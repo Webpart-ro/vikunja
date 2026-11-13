@@ -75,7 +75,7 @@
 
 					<template v-if="groupBy !== 'none' && tasks.length > 0">
 						<section
-							v-for="group in groupedTasks"
+							v-for="(group, groupIndex) in groupedTasks"
 							:key="group.key"
 							class="task-group"
 						>
@@ -91,8 +91,9 @@
 							</h3>
 							<ul class="tasks dragging-disabled">
 								<SingleTaskInProject
-									v-for="t in group.tasks"
+									v-for="(t, rowIndex) in group.tasks"
 									:key="`${group.key}-${t.id}`"
+									:ref="(el) => setTaskRef(el as InstanceType<typeof SingleTaskInProject> | null, groupedRowIndex(groupIndex, rowIndex))"
 									:show-list-color="false"
 									:can-mark-as-done="canWrite || isPseudoProject"
 									:the-task="t"
@@ -465,8 +466,19 @@ function setTaskRef(el: InstanceType<typeof SingleTaskInProject> | null, index: 
 	}
 }
 
+// Webpart: J/K follow the rows as rendered, also when the list is grouped.
+const navigableCount = computed(() => groupBy.value === 'none'
+	? tasks.value.length
+	: groupedTasks.value.reduce((sum, group) => sum + group.tasks.length, 0))
+
+function groupedRowIndex(groupIndex: number, rowIndex: number) {
+	let offset = 0
+	for (let i = 0; i < groupIndex; i++) offset += groupedTasks.value[i]?.tasks.length ?? 0
+	return offset + rowIndex
+}
+
 function focusTask(index: number) {
-	if (index < 0 || index >= tasks.value.length) {
+	if (index < 0 || index >= navigableCount.value) {
 		return
 	}
 
@@ -484,14 +496,14 @@ function handleListNavigation(e: KeyboardEvent) {
 	const shortcut = eventToShortcutString(e)
 	if (shortcut === 'KeyJ') {
 		e.preventDefault()
-		focusTask(Math.min(focusedIndex.value + 1, tasks.value.length - 1))
+		focusTask(Math.min(focusedIndex.value + 1, navigableCount.value - 1))
 		return
 	}
 
 	if (shortcut === 'KeyK') {
 		e.preventDefault()
 		if (focusedIndex.value === -1) {
-			focusTask(tasks.value.length - 1)
+			focusTask(navigableCount.value - 1)
 			return
 		}
 
