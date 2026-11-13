@@ -976,3 +976,58 @@ func (err ErrTooManyReauthAttempts) HTTPError() web.HTTPError {
 		Message:  "Too many failed attempts. Please wait a few minutes and try again.",
 	}
 }
+
+// ErrTOTPEnrollmentRequired represents an error where a local account without TOTP
+// tried to use the API while service.enforcetotp is on.
+type ErrTOTPEnrollmentRequired struct {
+	UserID int64
+}
+
+// IsErrTOTPEnrollmentRequired checks if an error is a ErrTOTPEnrollmentRequired.
+func IsErrTOTPEnrollmentRequired(err error) bool {
+	_, ok := err.(*ErrTOTPEnrollmentRequired)
+	return ok
+}
+
+func (err *ErrTOTPEnrollmentRequired) Error() string {
+	return fmt.Sprintf("TOTP enrollment required [UserID: %d]", err.UserID)
+}
+
+// ErrCodeTOTPEnrollmentRequired holds the unique world-error code of this error.
+// Codes 1090+ are reserved for the Webpart fork so upstream additions don't collide.
+const ErrCodeTOTPEnrollmentRequired = 1090
+
+// HTTPError holds the http error description
+func (err *ErrTOTPEnrollmentRequired) HTTPError() web.HTTPError {
+	return web.HTTPError{
+		HTTPCode: http.StatusForbidden,
+		Code:     ErrCodeTOTPEnrollmentRequired,
+		Message:  "Two-factor authentication is required for this account. Enable it in your account settings to continue.",
+	}
+}
+
+// ErrTOTPCannotBeDisabled represents an error where a user tried to turn TOTP off
+// while service.enforcetotp is on.
+type ErrTOTPCannotBeDisabled struct{}
+
+// IsErrTOTPCannotBeDisabled checks if an error is a ErrTOTPCannotBeDisabled.
+func IsErrTOTPCannotBeDisabled(err error) bool {
+	_, ok := err.(*ErrTOTPCannotBeDisabled)
+	return ok
+}
+
+func (err *ErrTOTPCannotBeDisabled) Error() string {
+	return "TOTP cannot be disabled while it is enforced"
+}
+
+// ErrCodeTOTPCannotBeDisabled holds the unique world-error code of this error.
+const ErrCodeTOTPCannotBeDisabled = 1091
+
+// HTTPError holds the http error description
+func (err *ErrTOTPCannotBeDisabled) HTTPError() web.HTTPError {
+	return web.HTTPError{
+		HTTPCode: http.StatusForbidden,
+		Code:     ErrCodeTOTPCannotBeDisabled,
+		Message:  "Two-factor authentication is required on this instance and cannot be disabled.",
+	}
+}

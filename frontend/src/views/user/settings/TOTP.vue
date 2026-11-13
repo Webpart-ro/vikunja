@@ -3,6 +3,13 @@
 		v-if="configStore.totp_enabled && isLocalUser"
 		:title="$t('user.settings.totp.title')"
 	>
+		<Message
+			v-if="configStore.totp_enforced && status.isSuccess.value && !totp.enabled"
+			variant="warning"
+			class="mbe-4"
+		>
+			{{ $t('webpart.totp.required') }}
+		</Message>
 		<template v-if="status.isSuccess.value && !totp.enabled && !totp.secret">
 			<ReauthFields
 				v-model:password="totpPassword"
@@ -53,7 +60,10 @@
 			<p>
 				{{ $t('user.settings.totp.setupSuccess') }}
 			</p>
-			<p v-if="!totpDisableForm">
+			<p v-if="configStore.totp_enforced">
+				{{ $t('webpart.totp.cannotDisable') }}
+			</p>
+			<p v-else-if="!totpDisableForm">
 				<XButton
 					danger
 					@click="totpDisableForm = true"
@@ -61,7 +71,7 @@
 					{{ $t('misc.disable') }}
 				</XButton>
 			</p>
-			<div v-if="totpDisableForm">
+			<div v-if="totpDisableForm && !configStore.totp_enforced">
 				<ReauthFields
 					v-model:password="totpDisablePassword"
 					v-model:passcode="totpDisablePasscode"
@@ -93,6 +103,7 @@
 
 
 <script lang="ts" setup>
+import Message from '@/components/misc/Message.vue'
 import {computed, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 

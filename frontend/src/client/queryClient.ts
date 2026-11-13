@@ -3,6 +3,7 @@ import {CancelledError, QueryCache, QueryClient, type QueryMeta} from '@tanstack
 import {isRequestContextAbort} from '@/client/requestContext'
 import {isInTrashError} from '@/client/queries/trashErrors'
 import {error} from '@/message'
+import {TOTP_ENROLLMENT_REQUIRED} from '@/constants/webpartErrorCodes'
 
 declare module '@tanstack/vue-query' {
 	interface Register {
@@ -28,7 +29,9 @@ export const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
 			staleTime: 60_000,
-			retry: (failureCount, cause) => !isInTrashError(cause) && failureCount < 1,
+			retry: (failureCount, cause) => !isInTrashError(cause)
+				&& (cause as {code?: unknown} | null)?.code !== TOTP_ENROLLMENT_REQUIRED
+				&& failureCount < 1,
 			refetchOnWindowFocus: false,
 		},
 		mutations: {

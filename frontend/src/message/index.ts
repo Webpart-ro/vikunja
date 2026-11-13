@@ -1,5 +1,6 @@
 import {i18n} from '@/i18n'
 import {notify} from '@kyvg/vue3-notification'
+import {TOTP_ENROLLMENT_REQUIRED} from '@/constants/webpartErrorCodes'
 
 function errorRecord(value: unknown): Record<string, unknown> {
 	return value !== null && typeof value === 'object' ? value as Record<string, unknown> : {}
@@ -68,6 +69,11 @@ function toast(type: 'error' | 'success', title: string, e: unknown, actions: Ac
 }
 
 export function error(e: unknown, actions: Action[] = []) {
+	// Webpart: while 2FA setup is pending (service.enforcetotp) every background request is refused
+	// with 1090; the router already keeps the user on the setup page, so don't stack toasts for it.
+	if ((e as {code?: unknown} | null)?.code === TOTP_ENROLLMENT_REQUIRED) {
+		return
+	}
 	// The 3s library default is too short to notice and read an error.
 	toast('error', i18n.global.t('error.error'), e, actions, {duration: 10_000})
 }
