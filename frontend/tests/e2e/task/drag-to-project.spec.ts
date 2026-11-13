@@ -68,7 +68,8 @@ async function createProjectsWithTasks() {
 	}
 }
 
-test.describe('Drag Task to Project in Sidebar', () => {
+// Webpart: dragging tasks onto projects needs the project sidebar, which is phone-only now.
+test.describe.skip('Drag Task to Project in Sidebar', () => {
 	test.describe('From List View', () => {
 		test('Can drag a task to another project in the sidebar', async ({authenticatedPage: page}) => {
 			const {sourceProject, targetProject, sourceListView, tasks} = await createProjectsWithTasks()

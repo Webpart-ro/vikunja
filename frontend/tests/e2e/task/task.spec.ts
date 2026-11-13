@@ -142,8 +142,9 @@ test.describe('Task', () => {
 		await favoriteButton.click()
 		await favoritePromise
 
-		// The Favorites menu item should appear after a task is favorited
-		await expect(page.locator('.menu-container')).toContainText('Favorites', {timeout: 10000})
+		// The Favorites entry should appear in the header project switcher after a task is favorited
+		await page.locator('.project-switcher__trigger').click()
+		await expect(page.locator('.project-switcher__menu')).toContainText('Favorites', {timeout: 10000})
 	})
 
 	test('Should show a task description icon if the task has a description', async ({authenticatedPage: page}) => {
@@ -552,7 +553,7 @@ test.describe('Task', () => {
 			})
 			expect(deleted.ok()).toBeTruthy()
 
-			await page.locator(`li[data-project-id="${projects[0].id}"] .list-menu-link`).first().click()
+			await page.getByRole('link', {name: projects[0].title}).first().click() // Webpart: breadcrumb link (no desktop sidebar)
 
 			await expect(page).toHaveURL(/\/projects\/1\/\d+/)
 			await expect(page.locator('.switch-view-container')).toBeVisible()
@@ -584,20 +585,20 @@ test.describe('Task', () => {
 			await expect(assignButton).toBeVisible({timeout: 10000})
 			await assignButton.click()
 
-			const input = page.locator('.task-view .column.assignees .multiselect input')
+			const input = page.locator('.task-view .sidebar-details__row.assignees .multiselect input')
 			const userToAssign = users[0]
 			// Use type/pressSequentially instead of fill to properly trigger Vue's input events
 			await input.click()
 			await input.pressSequentially(userToAssign.username.substring(0, 10), {delay: 20})
 			// Wait for search results (200ms debounce + API request time)
-			await expect(page.locator('.task-view .column.assignees .multiselect .search-results')).toBeVisible({timeout: 5000})
+			await expect(page.locator('.task-view .sidebar-details__row.assignees .multiselect .search-results')).toBeVisible({timeout: 5000})
 			// Focus preloads every project member, so pick the matching result rather than the first.
-			const result = page.locator('.task-view .column.assignees .multiselect .search-result-button').filter({hasText: userToAssign.username})
+			const result = page.locator('.task-view .sidebar-details__row.assignees .multiselect .search-result-button').filter({hasText: userToAssign.username})
 			await expect(result).toBeVisible()
 			await result.click()
 
 			await expect(page.locator('.global-notification')).toContainText('Success')
-			const assignees = page.locator('.task-view .column.assignees .multiselect .input-wrapper span.assignee')
+			const assignees = page.locator('.task-view .sidebar-details__row.assignees .multiselect .input-wrapper span.assignee')
 			await expect(assignees).toBeVisible()
 
 			await page.reload()
@@ -629,10 +630,10 @@ test.describe('Task', () => {
 
 			await page.goto(`/tasks/${tasks[0].id}`)
 
-			await page.locator('.task-view .column.assignees .multiselect .input-wrapper span.assignee .remove-assignee').click()
+			await page.locator('.task-view .sidebar-details__row.assignees .multiselect .input-wrapper span.assignee .remove-assignee').click()
 
 			await expect(page.locator('.global-notification')).toContainText('Success')
-			await expect(page.locator('.task-view .column.assignees .multiselect .input-wrapper span.assignee')).not.toBeVisible()
+			await expect(page.locator('.task-view .sidebar-details__row.assignees .multiselect .input-wrapper span.assignee')).not.toBeVisible()
 		})
 
 		test('Keeps a removed assignee unassigned after saving another field', async ({authenticatedPage: page, apiContext, userToken}) => {
@@ -655,7 +656,7 @@ test.describe('Task', () => {
 
 			await page.goto(`/tasks/${task.id}`)
 
-			const assignees = page.locator('.task-view .column.assignees .multiselect .input-wrapper span.assignee')
+			const assignees = page.locator('.task-view .sidebar-details__row.assignees .multiselect .input-wrapper span.assignee')
 			await expect(assignees).toHaveCount(2)
 			await page.getByRole('button', {name: `Remove ${removed.username} as assignee`}).click()
 			await expect(page.locator('.global-notification')).toContainText('Success')

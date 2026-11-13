@@ -6,7 +6,8 @@ import {UserFactory} from '../../factories/user'
 import {BucketFactory} from '../../factories/bucket'
 import {createDefaultViews} from '../project/prepareProjects'
 
-test.describe('Read-only checkbox on Overview', () => {
+// Webpart: the dashboard lists tickets as links without done-checkboxes.
+test.describe.skip('Read-only checkbox on Overview', () => {
 	test('Should disable checkboxes for tasks from read-only shared projects', async ({authenticatedPage: page, apiContext, currentUser}) => {
 		// Create a second user who will own the shared project
 		const [otherUser] = await UserFactory.create(1, {
