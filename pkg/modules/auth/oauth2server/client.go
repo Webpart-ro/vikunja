@@ -20,6 +20,8 @@ import (
 	"net"
 	"net/url"
 	"strings"
+
+	"code.vikunja.io/api/pkg/config"
 )
 
 // ValidateRedirectURI checks that the redirect_uri is either a Vikunja native
@@ -27,8 +29,9 @@ import (
 // recommended by RFC 8252 for native apps that cannot register a custom
 // scheme. Any address in 127.0.0.0/8, the IPv6 loopback (::1, in any
 // notation), and the literal hostname "localhost" are accepted; dangerous
-// schemes like javascript:, data:, https://, or non-loopback http:// targets
-// are rejected.
+// schemes like javascript:, data:, or non-loopback http:// targets are
+// rejected. https:// targets are only accepted when they exactly match an
+// entry in service.oauthtrustedredirecturis (Webpart: wiki login via Vikunja).
 func ValidateRedirectURI(redirectURI string) bool {
 	u, err := url.Parse(redirectURI)
 	if err != nil || u.Scheme == "" {
@@ -36,6 +39,10 @@ func ValidateRedirectURI(redirectURI string) bool {
 	}
 
 	if strings.HasPrefix(u.Scheme, "vikunja-") {
+		return true
+	}
+
+	if u.Scheme == "https" && isTrustedRedirectURI(redirectURI) {
 		return true
 	}
 
@@ -49,5 +56,21 @@ func ValidateRedirectURI(redirectURI string) bool {
 		}
 	}
 
+	return false
+}
+
+// isTrustedRedirectURI reports whether redirectURI exactly matches one of the
+// operator-configured service.oauthtrustedredirecturis entries. Exact match only:
+// no prefixes or wildcards, so an attacker can't append a path or query.
+func isTrustedRedirectURI(redirectURI string) bool {
+	for _, entry := range config.ServiceOAuthTrustedRedirectURIs.GetStringSlice() {
+		// An env var arrives as one comma-separated string.
+		for _, trusted := range strings.Split(entry, ",") {
+			trusted = strings.TrimSpace(trusted)
+			if trusted != "" && trusted == redirectURI {
+				return true
+			}
+		}
+	}
 	return false
 }

@@ -19,6 +19,8 @@ package oauth2server
 import (
 	"testing"
 
+	"code.vikunja.io/api/pkg/config"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -79,5 +81,27 @@ func TestValidateRedirectURI(t *testing.T) {
 	})
 	t.Run("rejects empty URI", func(t *testing.T) {
 		assert.False(t, ValidateRedirectURI(""))
+	})
+}
+
+func TestValidateRedirectURITrustedHTTPS(t *testing.T) {
+	config.ServiceOAuthTrustedRedirectURIs.Set([]string{"https://wiki.example.com/api/auth/vikunja/callback, https://other.example.com/cb"})
+	t.Cleanup(func() { config.ServiceOAuthTrustedRedirectURIs.Set([]string{}) })
+
+	t.Run("accepts an exactly configured https uri", func(t *testing.T) {
+		assert.True(t, ValidateRedirectURI("https://wiki.example.com/api/auth/vikunja/callback"))
+		assert.True(t, ValidateRedirectURI("https://other.example.com/cb"))
+	})
+	t.Run("rejects a different path on a trusted host", func(t *testing.T) {
+		assert.False(t, ValidateRedirectURI("https://wiki.example.com/evil"))
+	})
+	t.Run("rejects an appended query", func(t *testing.T) {
+		assert.False(t, ValidateRedirectURI("https://wiki.example.com/api/auth/vikunja/callback?x=1"))
+	})
+	t.Run("rejects an untrusted https host", func(t *testing.T) {
+		assert.False(t, ValidateRedirectURI("https://attacker.example.com/api/auth/vikunja/callback"))
+	})
+	t.Run("rejects http even if the rest matches", func(t *testing.T) {
+		assert.False(t, ValidateRedirectURI("http://wiki.example.com/api/auth/vikunja/callback"))
 	})
 }
