@@ -139,6 +139,15 @@ watch(() => route.name as string, (routeName) => {
 	}
 })
 
+// Webpart: project settings pages (opened directly or after a reload, without the board behind
+// them) don't all set the current project, which left the header's project title empty.
+watch(() => [route.name, route.params.projectId] as const, ([routeName, projectIdParam]) => {
+	const projectId = Number(projectIdParam)
+	if (typeof routeName === 'string' && routeName.startsWith('project.settings') && projectId > 0 && baseStore.currentProjectId !== projectId) {
+		baseStore.setCurrentProject({id: projectId})
+	}
+}, {immediate: true})
+
 // TODO: Reset the title if the page component does not set one itself
 
 useRenewTokenOnFocus()
