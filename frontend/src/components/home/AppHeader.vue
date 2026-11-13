@@ -21,9 +21,7 @@
 			v-if="currentProject?.id"
 			class="project-title-wrapper"
 		>
-			<span class="project-title">
-				{{ currentProject.title === '' ? $t('misc.loading') : getProjectTitle(currentProject) }}
-			</span>
+			<ProjectSwitcher />
 
 			<BaseButton
 				v-if="!isEditorContentEmpty(currentProject.description)"
@@ -77,7 +75,7 @@
 					>
 						<UserAvatar
 							:user="authStore.info"
-							:size="40"
+							:size="32"
 							class="avatar"
 						/>
 						<span class="username">{{ authStore.userDisplayName }}</span>
@@ -138,10 +136,10 @@ import TimerBadge from '@/components/time-tracking/TimerBadge.vue'
 import Logo from '@/components/home/Logo.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import MenuButton from '@/components/home/MenuButton.vue'
+import ProjectSwitcher from '@/components/home/ProjectSwitcher.vue'
 import OpenQuickActions from '@/components/misc/OpenQuickActions.vue'
 import UserAvatar from '@/components/misc/UserAvatar.vue'
 
-import { getProjectTitle } from '@/helpers/getProjectTitle'
 import { isEditorContentEmpty } from '@/helpers/editorContentEmpty'
 
 import { useBaseStore } from '@/stores/base'
@@ -194,10 +192,12 @@ $user-dropdown-width-mobile: 5rem;
 	gap: var(--navbar-gap-width);
 	min-block-size: $navbar-height;
 
-	background: var(--site-background);
+	background: var(--white);
+	border-block-end: 1px solid var(--grey-200);
 
 	@media screen and (min-width: $tablet) {
-		padding-inline-start: 2rem;
+		inset-inline-start: $rail-width;
+		padding-inline: 1.5rem .75rem;
 		align-items: stretch;
 	}
 
@@ -218,13 +218,6 @@ $user-dropdown-width-mobile: 5rem;
 
 .logo-link {
 	display: none;
-
-	@media screen and (min-width: $tablet) {
-		align-self: stretch;
-		display: flex;
-		align-items: center;
-		margin-inline-end: .5rem;
-	}
 }
 
 .menu-button {
@@ -235,6 +228,11 @@ $user-dropdown-width-mobile: 5rem;
 	@media screen and (max-width: $tablet) {
 		margin-inline-start: 1rem;
 	}
+
+	// the icon rail owns the sidebar toggle on desktop
+	@media screen and (min-width: $tablet) {
+		display: none;
+	}
 }
 
 .project-title-wrapper {
@@ -242,12 +240,16 @@ $user-dropdown-width-mobile: 5rem;
 	display: flex;
 	align-items: center;
 
+	@media screen and (min-width: $tablet) {
+		margin-inline: 0 auto;
+	}
+
 	// this makes the truncated text of the project title work
 	// inside the flexbox parent
 	min-inline-size: 0;
 
 	@media screen and (min-width: $tablet) {
-		padding-inline: var(--navbar-gap-width);
+		padding-inline: 0 var(--navbar-gap-width);
 	}
 }
 
@@ -258,8 +260,12 @@ $user-dropdown-width-mobile: 5rem;
 	overflow: hidden;
 	white-space: nowrap;
 
+	font-weight: 700;
+	color: var(--text-strong);
+
 	@media screen and (min-width: $tablet) {
-		font-size: 1.75rem;
+		font-size: 1.25rem;
+		letter-spacing: -0.01em;
 	}
 }
 
@@ -283,6 +289,7 @@ $user-dropdown-width-mobile: 5rem;
 
 .navbar-end {
 	flex: 0 0 auto;
+	margin-inline-start: auto;
 	display: flex;
 	align-items: stretch;
 
@@ -331,7 +338,7 @@ $user-dropdown-width-mobile: 5rem;
 .avatar {
 	border-radius: 100%;
 	vertical-align: middle;
-	block-size: 40px;
+	block-size: 32px;
 	margin-inline-end: .5rem;
 }
 </style>

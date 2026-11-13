@@ -22,6 +22,7 @@ import {
 	faCheckDouble,
 	faChessKnight,
 	faChevronDown,
+	faChevronRight,
 	faCircleInfo,
 	faCloudDownloadAlt,
 	faCloudUploadAlt,
@@ -29,6 +30,12 @@ import {
 	faCoffee,
 	faCog,
 	faCopy,
+	faCodeBranch,
+	faCodePullRequest,
+	faCodeMerge,
+	faCircleCheck,
+	faCircleXmark,
+	faCircleHalfStroke,
 	faDownload,
 	faEllipsisH,
 	faEllipsisV,
@@ -140,6 +147,7 @@ library.add(faBellSlash)
 library.add(faCalendar)
 library.add(faCalendarAlt)
 library.add(faCheck)
+library.add(faChevronRight)
 library.add(faCheckDouble)
 library.add(faChessKnight)
 library.add(faChevronDown)
@@ -153,6 +161,8 @@ library.add(faCoffee)
 library.add(faCog)
 library.add(faComments)
 library.add(faCopy)
+// Webpart GitHub integration
+library.add(faCodeBranch, faCodePullRequest, faCodeMerge, faCircleCheck, faCircleXmark, faCircleHalfStroke)
 library.add(faDownload)
 library.add(faEllipsisH)
 library.add(faEllipsisV)

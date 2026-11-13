@@ -18,36 +18,32 @@ withDefaults(defineProps<{
 </script>
 
 <style lang="scss" scoped>
+// Webpart: underline tabs instead of a floating pill box
 .switch-view {
-	background: var(--white);
 	display: inline-flex;
-	border-radius: $radius;
-	font-size: .75rem;
-	box-shadow: var(--shadow-sm);
-	padding: .5rem;
+	flex-wrap: wrap;
+	gap: .25rem;
+	font-size: .875rem;
+	border-block-end: 1px solid var(--grey-200);
 }
 
 ::v-slotted(.switch-view-button) {
-	padding: .25rem .5rem;
+	padding: .6rem .75rem;
 	display: block;
 	white-space: nowrap;
-	border-radius: $radius;
-	transition: all 100ms;
-
-	&:not(:last-child) {
-		margin-inline-end: .5rem;
-	}
+	color: var(--text-muted);
+	border-block-end: 2px solid transparent;
+	margin-block-end: -1px;
+	transition: color 100ms, border-color 100ms;
 
 	&:hover {
-		color: var(--switch-view-color);
-		background: var(--switch-view-active-background);
+		color: var(--text-strong);
 	}
 
 	&.is-active {
-		color: var(--switch-view-color);
-		background: var(--switch-view-active-background);
-		font-weight: bold;
-		box-shadow: var(--shadow-xs);
+		color: var(--text-strong);
+		font-weight: 600;
+		border-block-end-color: var(--primary);
 	}
 }
 </style>

@@ -81,6 +81,8 @@ function dragEndEvent(taskId: string, newIndex: number) {
 
 describe('ProjectList', () => {
 	beforeEach(() => {
+		// these tests cover drag-to-reorder, which only exists in the ungrouped list
+		localStorage.setItem('webpart.list.groupBy.10', 'none')
 		updatePosition.mockReset()
 		updatePosition.mockResolvedValue({data: {position: 200}})
 		// Asymmetric positions: the midpoint between the neighbours must differ from the dragged task's own position.

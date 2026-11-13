@@ -142,7 +142,8 @@ useResizeObserver(switchViewContainerRef, () => {
 const currentProject = computed(() => queriedProject.value ?? normalizeProject({id: 0}))
 useTitle(() => currentProject.value?.id ? getProjectTitle(currentProject.value) : '')
 
-const views = computed(() => currentProject.value.views)
+// Webpart: the Gantt view is hidden from the tabs (view records stay on the server)
+const views = computed(() => (currentProject.value.views ?? []).filter((view: ProjectView) => view.view_kind !== 'gantt'))
 
 const activeViewTitle = computed(() => {
 	const activeView = views.value.find((view: ProjectView) => view.id === props.viewId)

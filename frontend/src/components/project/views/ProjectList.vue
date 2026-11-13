@@ -7,6 +7,21 @@
 	>
 		<template #header>
 			<div class="filter-container">
+				<label class="group-by">
+					<span class="group-by__label">{{ $t('webpart.list.groupBy') }}</span>
+					<select
+						v-model="groupBy"
+						class="group-by__select"
+					>
+						<option
+							v-for="option in groupByOptions"
+							:key="option.value"
+							:value="option.value"
+						>
+							{{ option.label }}
+						</option>
+					</select>
+				</label>
 				<SortPopup
 					v-model="sortByParam"
 				/>
@@ -47,8 +62,50 @@
 						</ButtonLink>
 					</Nothing>
 
-					<draggable
+					<div
 						v-if="tasks && tasks.length > 0"
+						class="list-columns-header"
+						aria-hidden="true"
+					>
+						<span class="list-columns-header__task">{{ $t('webpart.list.task') }}</span>
+						<span class="list-columns-header__assignees">{{ $t('task.attributes.assignees') }}</span>
+						<span class="list-columns-header__due">{{ $t('task.attributes.dueDate') }}</span>
+						<span class="list-columns-header__icons" />
+					</div>
+
+					<template v-if="groupBy !== 'none' && tasks.length > 0">
+						<section
+							v-for="group in groupedTasks"
+							:key="group.key"
+							class="task-group"
+						>
+							<h3 class="task-group__header">
+								<span
+									v-if="group.color"
+									class="task-group__dot"
+									:style="{background: group.color}"
+									aria-hidden="true"
+								/>
+								<span class="task-group__title">{{ group.label }}</span>
+								<span class="task-group__count">{{ group.tasks.length }}</span>
+							</h3>
+							<ul class="tasks dragging-disabled">
+								<SingleTaskInProject
+									v-for="t in group.tasks"
+									:key="`${group.key}-${t.id}`"
+									:show-list-color="false"
+									:can-mark-as-done="canWrite || isPseudoProject"
+									:the-task="t"
+									:all-tasks="allTasks"
+									columns
+									@taskUpdated="updateTasks"
+								/>
+							</ul>
+						</section>
+					</template>
+
+					<draggable
+						v-else-if="tasks && tasks.length > 0"
 						v-model="tasks"
 						:group="{name: 'tasks', put: false}"
 						:disabled="!canDragTasks || !isPositionSorting"
@@ -76,6 +133,7 @@
 								:can-mark-as-done="canWrite || isPseudoProject"
 								:the-task="t"
 								:all-tasks="allTasks"
+								columns
 								@taskUpdated="updateTasks"
 							>
 								<span
@@ -126,6 +184,8 @@ import {isSavedFilterProject} from '@/client/queries/projects'
 import {useBaseStore} from '@/stores/base'
 import {useTaskDragState} from '@/composables/useTaskDragState'
 import {useDelayedLoading} from '@/composables/useDelayedLoading'
+import {useStorage} from '@vueuse/core'
+import {useI18n} from 'vue-i18n'
 
 
 const props = defineProps<{
@@ -172,6 +232,131 @@ const tasks = computed({
 watch([projectId, () => props.viewId], () => { dragTasks.value = null })
 
 const isPositionSorting = computed(() => 'position' in sortByParam.value)
+
+// Webpart: group the list by assignee / due date / priority / label / status.
+// Grouping is a per-view, per-browser preference; drag-to-reorder only works ungrouped.
+type GroupBy = 'none' | 'assignee' | 'due' | 'priority' | 'label' | 'status'
+interface TaskGroup {
+	key: string
+	label: string
+	color?: string
+	tasks: TaskResponse[]
+}
+
+const {t: translate} = useI18n()
+const groupBy = useStorage<GroupBy>(() => `webpart.list.groupBy.${props.viewId}`, 'assignee')
+
+const groupByOptions = computed<{value: GroupBy, label: string}[]>(() => [
+	{value: 'none', label: translate('webpart.list.groupNone')},
+	{value: 'assignee', label: translate('task.attributes.assignees')},
+	{value: 'due', label: translate('task.attributes.dueDate')},
+	{value: 'priority', label: translate('task.attributes.priority')},
+	{value: 'label', label: translate('task.attributes.labels')},
+	{value: 'status', label: translate('webpart.list.status')},
+])
+
+function startOfDay(date: Date) {
+	const d = new Date(date)
+	d.setHours(0, 0, 0, 0)
+	return d
+}
+
+function hexColor(hex?: string | null) {
+	if (!hex) return undefined
+	return hex.startsWith('#') ? hex : `#${hex}`
+}
+
+const groupedTasks = computed<TaskGroup[]>(() => {
+	const list = tasks.value
+	const groups = new Map<string, TaskGroup>()
+	const add = (key: string, label: string, task: TaskResponse, color?: string) => {
+		if (!groups.has(key)) groups.set(key, {key, label, color, tasks: []})
+		groups.get(key)!.tasks.push(task)
+	}
+
+	switch (groupBy.value) {
+		case 'assignee':
+			for (const task of list) {
+				if (!task.assignees?.length) {
+					add('unassigned', translate('webpart.list.unassigned'), task)
+					continue
+				}
+				for (const user of task.assignees) {
+					add(`user-${user.id}`, user.name || user.username || '', task)
+				}
+			}
+			break
+		case 'due': {
+			const today = startOfDay(new Date())
+			const tomorrow = new Date(today.getTime() + 86400000)
+			const weekEnd = new Date(today.getTime() + 7 * 86400000)
+			const buckets: [string, string][] = [
+				['overdue', translate('task.show.overdue')],
+				['today', translate('webpart.list.today')],
+				['week', translate('webpart.list.next7Days')],
+				['later', translate('webpart.list.later')],
+				['none', translate('task.show.noDates')],
+			]
+			buckets.forEach(([key, label]) => groups.set(key, {key, label, tasks: []}))
+			for (const task of list) {
+				const due = task.due_date ? new Date(task.due_date) : null
+				let key = 'none'
+				if (due && due.getTime() > 0) {
+					if (due < today && !task.done) key = 'overdue'
+					else if (due < tomorrow) key = 'today'
+					else if (due < weekEnd) key = 'week'
+					else key = 'later'
+				}
+				groups.get(key)!.tasks.push(task)
+			}
+			// within a due-date group, soonest first
+			for (const group of groups.values()) {
+				group.tasks.sort((a, b) => +new Date(a.due_date ?? 0) - +new Date(b.due_date ?? 0))
+			}
+			break
+		}
+		case 'priority': {
+			const names = ['unset', 'low', 'medium', 'high', 'urgent', 'doNow']
+			for (let p = 5; p >= 0; p--) {
+				groups.set(`p${p}`, {key: `p${p}`, label: translate(`task.priority.${names[p]}`), tasks: []})
+			}
+			for (const task of list) {
+				groups.get(`p${Math.min(Math.max(task.priority ?? 0, 0), 5)}`)!.tasks.push(task)
+			}
+			break
+		}
+		case 'label':
+			for (const task of list) {
+				if (!task.labels?.length) {
+					add('nolabel', translate('webpart.list.noLabel'), task)
+					continue
+				}
+				for (const label of task.labels) {
+					add(`label-${label.id}`, label.title ?? '', task, hexColor(label.hex_color))
+				}
+			}
+			break
+		case 'status':
+			groups.set('open', {key: 'open', label: translate('webpart.list.open'), tasks: []})
+			groups.set('done', {key: 'done', label: translate('task.attributes.done'), tasks: []})
+			for (const task of list) {
+				groups.get(task.done ? 'done' : 'open')!.tasks.push(task)
+			}
+			break
+	}
+
+	const result = [...groups.values()].filter(group => group.tasks.length > 0)
+	if (groupBy.value === 'assignee' || groupBy.value === 'label') {
+		// named groups alphabetically, the "none" bucket last
+		result.sort((a, b) => {
+			const aNone = a.key === 'unassigned' || a.key === 'nolabel'
+			const bNone = b.key === 'unassigned' || b.key === 'nolabel'
+			if (aNone !== bNone) return aNone ? 1 : -1
+			return a.label.localeCompare(b.label)
+		})
+	}
+	return result
+})
 
 const baseStore = useBaseStore()
 const {setDraggedTask} = useTaskDragState()
@@ -399,6 +584,142 @@ onBeforeUnmount(() => {
 
 	&:active {
 		cursor: grabbing;
+	}
+}
+
+.group-by {
+	display: inline-flex;
+	align-items: center;
+	gap: .4rem;
+	block-size: 2.25rem;
+	padding: 0 .4rem 0 .75rem;
+	border: 1px solid var(--grey-200);
+	border-radius: var(--radius-md);
+	background: var(--white);
+	font-size: .85rem;
+	color: var(--text-muted);
+}
+
+.group-by__select {
+	border: 0;
+	background: transparent;
+	font: inherit;
+	font-weight: 600;
+	color: var(--text-strong);
+	cursor: pointer;
+}
+
+// Webpart: column headings + aligned assignee/due cells
+$col-assignees: 7rem;
+$col-due: 9.5rem;
+$col-icons: 5.5rem;
+
+.list-columns-header {
+	display: flex;
+	gap: .75rem;
+	padding: .75rem 2.5rem .5rem 2.4rem;
+	border-block-end: 1px solid var(--grey-200);
+	font-size: .7rem;
+	font-weight: 600;
+	letter-spacing: .05em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+
+	&__task { flex: 1; }
+	&__assignees { flex: 0 0 $col-assignees; }
+	&__due { flex: 0 0 $col-due; }
+	&__icons { flex: 0 0 $col-icons; }
+
+	@media screen and (max-width: $tablet) {
+		display: none;
+	}
+}
+
+.task-group + .task-group {
+	border-block-start: 1px solid var(--grey-200);
+}
+
+.task-group__header {
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+	margin: 0;
+	padding: .9rem 1.25rem .25rem;
+	font-size: .85rem;
+	font-weight: 600;
+	color: var(--text-strong);
+}
+
+.task-group__dot {
+	inline-size: .55rem;
+	block-size: .55rem;
+	border-radius: 50%;
+}
+
+.task-group__count {
+	padding: .05rem .45rem;
+	border-radius: 999px;
+	background: var(--grey-100);
+	color: var(--text-muted);
+	font-size: .7rem;
+	font-weight: 600;
+}
+
+:deep(.single-task.is-columns) {
+	@media screen and (min-width: $tablet) {
+		.tasktext {
+			display: flex;
+			align-items: center;
+			gap: .75rem;
+			flex: 1;
+			min-inline-size: 0;
+
+			> span:first-child {
+				flex: 0 1 auto;
+				min-inline-size: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.labels {
+				flex: 1 1 auto;
+				min-inline-size: 0;
+				flex-wrap: nowrap;
+				overflow: hidden;
+				margin: 0;
+			}
+		}
+
+		.cell-assignees {
+			flex: 0 0 $col-assignees;
+			margin: 0 0 0 auto;
+		}
+
+		.cell-due {
+			flex: 0 0 $col-due;
+			font-size: .8rem;
+			color: var(--text-muted);
+
+			.dueDate {
+				padding: 0;
+			}
+
+			time {
+				font-style: normal;
+			}
+		}
+
+		.cell-icons {
+			flex: 0 0 $col-icons;
+			display: inline-flex;
+			gap: .25rem;
+			color: var(--grey-400);
+		}
+
+		.cell-empty {
+			color: var(--grey-300);
+		}
 	}
 }
 

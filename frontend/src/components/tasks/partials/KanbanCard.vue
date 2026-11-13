@@ -315,13 +315,20 @@ $task-background: var(--white);
 	-webkit-touch-callout: none; // iOS Safari
 	user-select: none;
 	cursor: pointer;
-	box-shadow: var(--shadow-xs);
+	box-shadow: 0 1px 2px hsla(var(--grey-500-hsl), .08);
+	border: 1px solid var(--grey-200);
 	display: block;
 
 	font-size: .9rem;
-	border-radius: $radius;
+	border-radius: var(--radius-md);
 	background: $task-background;
 	overflow: hidden;
+	transition: border-color $transition, box-shadow $transition;
+
+	&:hover {
+		border-color: var(--grey-300);
+		box-shadow: 0 4px 12px hsla(var(--grey-500-hsl), .12);
+	}
 
 	&.loader-container.is-loading::after {
 		inline-size: 1.5rem;
@@ -333,7 +340,10 @@ $task-background: var(--white);
 
 	h3 {
 		font-family: $family-sans-serif;
-		font-size: .85rem;
+		font-size: .875rem;
+		font-weight: 500;
+		line-height: 1.4;
+		color: var(--text-strong);
 		word-break: break-word;
 	}
 
@@ -348,6 +358,7 @@ $task-background: var(--white);
 		align-items: center;
 		padding: 0 .25rem;
 		font-size: .85rem;
+		color: var(--text-muted);
 
 		.icon {
 			margin-inline-end: .25rem;
@@ -405,8 +416,9 @@ $task-background: var(--white);
 	.due-date,
 	.priority-label {
 		background: var(--grey-100);
-		border-radius: $radius;
-		padding: 0 .5rem;
+		border-radius: var(--radius-sm);
+		padding: 0 .4rem;
+		font-size: .75rem;
 	}
 
 	.task-id, .project-title {

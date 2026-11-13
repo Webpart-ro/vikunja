@@ -13,9 +13,19 @@
 				<Message v-if="motd !== ''">
 					{{ motd }}
 				</Message>
-				<h2 class="image-title">
-					{{ $t("misc.welcomeBack") }}
-				</h2>
+				<!-- Webpart: branded panel instead of the Vikunja llama photo -->
+				<WebpartMark
+					class="image-mark"
+					aria-hidden="true"
+				/>
+				<div>
+					<p class="image-eyebrow">
+						Webpart Tasks
+					</p>
+					<h2 class="image-title">
+						{{ $t("misc.welcomeBack") }}
+					</h2>
+				</div>
 			</section>
 			<main
 				id="main-content"
@@ -50,6 +60,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import Logo from '@/components/home/Logo.vue'
+import WebpartMark from '@/assets/webpart-mark.svg?component'
 import Message from '@/components/misc/Message.vue'
 import Legal from '@/components/misc/Legal.vue'
 import ApiConfig from '@/components/misc/ApiConfig.vue'
@@ -69,7 +80,8 @@ const props = withDefaults(
 
 const isDesktop = isDesktopApp()
 const hasStoredApiUrl = isDesktop && localStorage.getItem('API_URL') !== null
-const shouldShowApiConfig = computed(() => props.showApiConfig && (!isDesktop || hasStoredApiUrl))
+// Webpart: frontend and API are served from the same origin, so the web build never shows the API-URL box
+const shouldShowApiConfig = computed(() => props.showApiConfig && isDesktop && hasStoredApiUrl)
 
 const configStore = useConfigStore()
 const motd = computed(() => configStore.motd)
@@ -84,8 +96,7 @@ useTitle(() => title.value)
 
 <style lang="scss" scoped>
 .no-auth-wrapper {
-	background: var(--site-background) url("@/assets/llama.svg?url") no-repeat
-		fixed bottom left;
+	background: var(--site-background);
 	min-block-size: 100vh;
 	display: flex;
 	flex-direction: column;
@@ -122,8 +133,13 @@ useTitle(() => title.value)
 	}
 
 	@media screen and (min-width: $tablet) {
-		background: url("@/assets/no-auth-image.jpg") no-repeat bottom/cover;
+		background:
+			radial-gradient(circle at 85% 15%, hsla(15, 83%, 46%, .35), transparent 45%),
+			radial-gradient(circle at 10% 90%, hsla(165, 50%, 35%, .55), transparent 50%),
+			#10312b;
 		position: relative;
+		justify-content: space-between;
+		padding: 2rem;
 
 		&.has-message {
 			justify-content: space-between;
@@ -131,19 +147,15 @@ useTitle(() => title.value)
 
 		// Darken mainly the lower part of the photo where the white heading sits so
 		// the text keeps a reliable contrast ratio across the whole image.
+		// faint grid texture
 		&::before {
 			content: "";
 			position: absolute;
-			inset-block-start: 0;
-			inset-inline-start: 0;
-			inset-inline-end: 0;
-			inset-block-end: 0;
-			background-image: linear-gradient(
-				to top,
-				rgba(0, 0, 0, 0.7) 0%,
-				rgba(0, 0, 0, 0.4) 35%,
-				rgba(0, 0, 0, 0.15) 100%
-			);
+			inset: 0;
+			background-image:
+				linear-gradient(hsla(0, 0%, 100%, .04) 1px, transparent 1px),
+				linear-gradient(90deg, hsla(0, 0%, 100%, .04) 1px, transparent 1px);
+			background-size: 32px 32px;
 		}
 
 		> * {
@@ -174,8 +186,27 @@ useTitle(() => title.value)
 	margin: 1rem 0;
 }
 
+.image-mark {
+	inline-size: 4rem;
+	block-size: 4rem;
+	border-radius: 15px;
+	box-shadow: 0 0 0 1px hsla(0, 0%, 100%, .15);
+}
+
+.image-eyebrow {
+	margin: 0 0 .25rem;
+	color: hsla(0, 0%, 100%, .7);
+	font-size: .85rem;
+	font-weight: 600;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
 .image-title {
+	margin: 0;
 	color: hsl(0deg, 0%, 100%);
-	font-size: 2.5rem;
+	font-size: 2.25rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
 }
 </style>

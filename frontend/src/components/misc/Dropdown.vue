@@ -82,7 +82,7 @@ function close() {
 // Menus in a dialog render in the top layer, above the navbar.
 function fixedNavbarBottom(trigger: HTMLElement): number {
 	const navbar = document.querySelector<HTMLElement>('.navbar')
-	if (!navbar || trigger.closest('dialog[open]') || getComputedStyle(navbar).position !== 'fixed') {
+	if (!navbar || navbar.contains(trigger) || trigger.closest('dialog[open]') || getComputedStyle(navbar).position !== 'fixed') {
 		return 0
 	}
 	return navbar.getBoundingClientRect().bottom

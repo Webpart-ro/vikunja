@@ -105,6 +105,13 @@
 				{{ $t('project.webhooks.title') }}
 			</DropdownItem>
 			<DropdownItem
+				v-if="configStore.github_enabled"
+				:to="{ name: 'project.settings.github', params: { projectId: project.id } }"
+				icon="code-branch"
+			>
+				{{ $t('webpart.github.settingsTitle') }}
+			</DropdownItem>
+			<DropdownItem
 				:to="{ name: 'project.createFromParent', params: { parentProjectId: project.id } }"
 				icon="layer-group"
 			>

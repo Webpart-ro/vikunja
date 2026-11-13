@@ -21,17 +21,21 @@ withDefaults(defineProps<{
 
 <style lang="scss" scoped>
 .is-done {
-  // bright brand green with fixed dark text passes contrast in both themes
-  background: var(--success);
-  color: hsl(215, 27.9%, 16.9%);
-  padding: .5rem;
-  font-weight: bold;
+  // Webpart: soft status pill instead of a loud green block
+  display: inline-flex;
+  align-items: center;
+  background: hsla(var(--success-h), var(--success-s), 40%, .14);
+  color: var(--success-text);
+  padding: .3rem .55rem;
+  font-size: .75rem;
+  font-weight: 600;
   line-height: 1;
-  border-radius: 4px;
+  border-radius: 999px;
   text-align: center;
 }
 
 .is-done--small {
-	padding: .2rem .3rem;
+	padding: .15rem .45rem;
+	font-size: .7rem;
 }
 </style>

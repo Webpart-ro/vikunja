@@ -899,8 +899,8 @@ function unCollapseBucket(bucket: BucketResponse) {
 
 <style lang="scss">
 $ease-out: all .3s cubic-bezier(0.23, 1, 0.32, 1);
-$bucket-width: 300px;
-$bucket-header-height: 60px;
+$bucket-width: 288px;
+$bucket-header-height: 52px;
 $bucket-right-margin: 1rem;
 $crazy-height-calculation: '100vh - 4.5rem - 1.5rem - 1rem - 1.5rem - 11px';
 $crazy-height-calculation-tasks: '#{$crazy-height-calculation} - 1rem - 2.5rem - 2rem - #{$button-height} - 1rem';
@@ -948,13 +948,15 @@ $filter-container-height: '1rem - #{$switch-view-height}';
 			inset-inline-end: 0.5rem;
 			inset-block-end: 0.25rem;
 			inset-inline-start: 0.5rem;
-			border: 3px dashed var(--grey-300);
-			border-radius: $radius;
+			border: 2px dashed var(--grey-300);
+			border-radius: var(--radius-md);
 		}
 	}
 
 	.bucket {
-		border-radius: $radius;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--bucket-border, transparent);
+		background-color: var(--surface-sunken);
 		position: relative;
 
 		margin: 0 $bucket-right-margin 0 0;
@@ -976,7 +978,7 @@ $filter-container-height: '1rem - #{$switch-view-height}';
 		}
 
 		.task-item {
-			background-color: var(--grey-100);
+			background-color: var(--surface-sunken);
 			padding: .25rem .5rem;
 			position: relative;
 
@@ -1004,9 +1006,12 @@ $filter-container-height: '1rem - #{$switch-view-height}';
 		}
 
 		h2 {
-			font-size: 1rem;
+			font-size: .8rem;
 			margin: 0;
 			font-weight: 600 !important;
+			text-transform: uppercase;
+			letter-spacing: .04em;
+			color: var(--grey-700);
 		}
 
 		&.new-bucket {
@@ -1018,7 +1023,10 @@ $filter-container-height: '1rem - #{$switch-view-height}';
 			background: transparent;
 
 			.button {
-				background: var(--grey-100);
+				background: transparent;
+				border: 1px dashed var(--grey-300);
+				border-radius: var(--radius-lg);
+				box-shadow: none;
 				inline-size: 100%;
 			}
 		}
@@ -1038,7 +1046,7 @@ $filter-container-height: '1rem - #{$switch-view-height}';
 	}
 
 	.bucket-header {
-		background-color: var(--grey-100);
+		background-color: var(--surface-sunken);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -1050,11 +1058,17 @@ $filter-container-height: '1rem - #{$switch-view-height}';
 		}
 
 		.limit {
-			padding: 0 .5rem;
-			font-weight: bold;
+			padding: .1rem .5rem;
+			margin-inline: .25rem;
+			border-radius: 999px;
+			background: var(--grey-200);
+			color: var(--grey-600);
+			font-size: .75rem;
+			font-weight: 600;
 			white-space: nowrap;
 
 			&.is-max {
+				background: hsla(var(--danger-h), var(--danger-s), 50%, .12);
 				color: var(--danger-text);
 			}
 		}
@@ -1077,9 +1091,9 @@ $filter-container-height: '1rem - #{$switch-view-height}';
 		z-index: 2;
 		block-size: min-content;
 		padding: .5rem;
-		background-color: var(--grey-100);
-		border-end-start-radius: $radius;
-		border-end-end-radius: $radius;
+		background-color: var(--surface-sunken);
+		border-end-start-radius: var(--radius-lg);
+		border-end-end-radius: var(--radius-lg);
 		transform: none;
 		// At fractional device pixel ratios the scroll clip ends below the sticky footer, showing a sliver of tasks
 		box-shadow: 0 1px 0 var(--grey-100);

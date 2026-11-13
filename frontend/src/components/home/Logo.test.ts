@@ -22,13 +22,16 @@ afterEach(() => {
 })
 
 describe('Logo.vue', () => {
-	it('renders no img without a custom logo', () => {
+	it('renders the Webpart logo without a custom logo', () => {
 		window.CUSTOM_LOGO_URL = ''
 		window.CUSTOM_LOGO_URL_DARK = ''
 
 		const wrapper = mount(Logo)
 
-		expect(wrapper.find('img').exists()).toBe(false)
+		const img = wrapper.find('img')
+		expect(img.exists()).toBe(true)
+		expect(img.attributes('alt')).toBe('Webpart')
+		expect(img.attributes('src')).toContain('webpart-logo-black')
 	})
 
 	it('renders the custom logo as img', () => {

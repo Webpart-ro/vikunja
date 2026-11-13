@@ -22,12 +22,18 @@
     
     &.other-menu-items li,
     li > div {
-      height: 44px;
+      min-height: 40px;
       display: flex;
       align-items: center;
+      border-radius: var(--radius-md);
+      transition: background-color $transition;
 
       &:hover {
-        background: var(--white);
+        background: var(--grey-100);
+      }
+
+      &:has(> a.router-link-exact-active) {
+        background: hsla(var(--primary-hsl), .1);
       }
     }
 
@@ -96,7 +102,8 @@
 
       > a {
         color: $vikunja-nav-color;
-        padding: .75rem .5rem .75rem .25rem;
+        font-size: .9rem;
+        padding: .5rem .5rem .5rem .25rem;
         transition: all 0.2s ease;
 
         border-radius: 0;
@@ -107,6 +114,7 @@
 
         &.router-link-exact-active {
           color: var(--primary);
+          font-weight: 600;
         }
 
         .icon {

@@ -89,14 +89,13 @@ const showLoading = useDelayedLoading(() => props.loading)
 	// Custom styles
 	transition: all $transition;
 	border: 0;
-	text-transform: uppercase;
-	font-size: 0.85rem;
-	font-weight: bold;
+	font-size: 0.875rem;
+	font-weight: 600;
 	block-size: auto;
 	min-block-size: $button-height;
-	box-shadow: var(--shadow-sm);
+	box-shadow: none;
 	line-height: 1;
-	padding-inline: .5rem;
+	padding-inline: .75rem;
 	gap: .25rem;
 
 	// Default/Primary variant colors

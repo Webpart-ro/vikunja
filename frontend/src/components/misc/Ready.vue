@@ -66,7 +66,8 @@
 </template>
 
 <script lang="ts" setup>
-import Logo from '@/assets/logo.svg?component'
+// Webpart mark replaces the Vikunja llama on the loading screen
+import Logo from '@/assets/webpart-mark.svg?component'
 import ApiConfig from '@/components/misc/ApiConfig.vue'
 import Message from '@/components/misc/Message.vue'
 import CustomTransition from '@/components/misc/CustomTransition.vue'
@@ -96,14 +97,15 @@ const baseStore = useBaseStore()
 	inset-inline-start: 0;
 	inset-block-end: 0;
 	inset-inline-end: 0;
-	background: var(--grey-100);
+	background: var(--site-background);
 	z-index: 99;
 }
 
 .logo {
 	margin-block-end: 1rem;
-	inline-size: 100px;
-	block-size: 100px;
+	inline-size: 72px;
+	block-size: 72px;
+	border-radius: 16px;
 }
 
 .loader-container {
@@ -116,8 +118,7 @@ const baseStore = useBaseStore()
 }
 
 .offline {
-	background: url('@/assets/llama-nightscape.jpg') no-repeat center;
-	background-size: cover;
+	background: #10312b;
 	block-size: 100vh;
 }
 
