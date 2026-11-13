@@ -13,7 +13,7 @@ async function pickPreset(page: Page, name: string) {
 
 	await trigger.click()
 	await popup.locator('.selections').getByRole('button', {name, exact: true}).click()
-	await expect(page).toHaveTitle(`${name} | Vikunja`)
+	await expect(page).toHaveTitle(`${name} | Webpart Tasks`)
 	if (!await popup.isVisible()) {
 		await trigger.click()
 	}

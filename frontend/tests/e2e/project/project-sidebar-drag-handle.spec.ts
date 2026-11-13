@@ -1,3 +1,4 @@
+// Webpart: no project sidebar on desktop, so no drag handle there.
 import {test, expect} from '../../support/fixtures'
 import {ProjectFactory} from '../../factories/project'
 import {createDefaultViews} from './prepareProjects'
@@ -6,7 +7,7 @@ import {createDefaultViews} from './prepareProjects'
 // forced visible on top of the project color, because visibility was keyed off touch-event
 // support instead of the pointer type.
 test.describe('Project sidebar drag handle', () => {
-	test('does not overlap the project color on a touch capable desktop', async ({authenticatedPage: page, currentUser}) => {
+	test.skip('does not overlap the project color on a touch capable desktop', async ({authenticatedPage: page, currentUser}) => {
 		const project = (await ProjectFactory.create(1, {
 			owner_id: currentUser.id,
 			title: 'Colored Project',

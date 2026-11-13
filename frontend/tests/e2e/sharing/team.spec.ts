@@ -101,7 +101,7 @@ test.describe('Team', () => {
 
 		await page.goto(`/teams/${firstTeam.id}/edit`)
 		await expect(page.locator('input#teamtext')).toHaveValue(firstTeam.name)
-		await page.locator('.menu-container').getByRole('link', {name: 'Teams'}).click()
+		await page.locator('.icon-rail').getByRole('link', {name: 'Teams'}).click()
 		await page.locator('ul.teams').getByRole('link', {name: secondTeam.name, exact: true}).click()
 		await expect(page.locator('input#teamtext')).toHaveValue(secondTeam.name)
 		await page.locator('input#teamtext').fill('Unsaved team name')

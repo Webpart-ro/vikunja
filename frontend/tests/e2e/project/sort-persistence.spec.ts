@@ -9,10 +9,10 @@ async function selectSortInList(page: Page, optionLabel: string) {
 	await page.getByRole('button', {name: 'Apply sort'}).click()
 }
 
+// Webpart: projects are switched from the header title dropdown (no desktop sidebar).
 async function navigateViaSidebar(page: Page, projectTitle: string) {
-	await page.locator('.menu-list .list-menu-link', {
-		has: page.locator('.project-menu-title', {hasText: new RegExp(`^${projectTitle}$`)}),
-	}).first().click()
+	await page.locator('.project-switcher__trigger').click()
+	await page.locator('.project-switcher__item', {hasText: new RegExp(`^${projectTitle}$`)}).first().click()
 }
 
 test.describe('Sort persistence across sidebar navigation (#2753)', () => {

@@ -14,7 +14,7 @@
 					:style="{background: currentColor}"
 					aria-hidden="true"
 				/>
-				<span class="project-switcher__title">{{ title }}</span>
+				<span class="project-switcher__title project-title">{{ title }}</span>
 				<Icon
 					icon="chevron-down"
 					class="project-switcher__chevron"
@@ -119,6 +119,10 @@ const projectItems = computed<Item[]>(() => {
 })
 
 const groups = computed(() => [
+	{
+		label: t('project.pseudo.favorites.title'),
+		items: projectList.favoriteProject ? [{project: projectList.favoriteProject as ProjectResponse, depth: 0}] : [],
+	},
 	{
 		label: t('navigation.savedFilters'),
 		items: (projectList.savedFilterProjects as ProjectResponse[])
