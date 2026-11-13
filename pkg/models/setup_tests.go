@@ -84,6 +84,7 @@ func SetupTests() {
 		"webhooks",
 		"totp",
 		"oauth_codes",
+		"project_github_repos",
 		"user_identities",
 		"notifications",
 	)

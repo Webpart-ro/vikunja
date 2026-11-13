@@ -74,6 +74,7 @@ func GetTables() []interface{} {
 		&TaskUnreadStatus{},
 		&Session{},
 		&OAuthCode{},
+		&ProjectGithubRepo{},
 		&TimeEntry{},
 		&UserInviteLink{},
 		&UserInviteLinkTeam{},

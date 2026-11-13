@@ -17,6 +17,7 @@ import {useAuthStore} from '@/stores/auth'
 import {useBaseStore} from '@/stores/base'
 import {useConfigStore} from '@/stores/config'
 import {loadUserInfo} from '@/router/loadUserInfo'
+import {totpEnrollmentRedirect} from '@/router/totpEnforcement'
 import {canLinkAccounts} from '@/helpers/canLinkAccounts'
 
 import Login from '@/views/user/Login.vue'
@@ -320,6 +321,15 @@ const router = createRouter({
 			path: '/projects/:projectId/settings/webhooks',
 			name: 'project.settings.webhooks',
 			component: () => import('@/views/project/settings/ProjectSettingsWebhooks.vue'),
+			meta: {
+				showAsModal: true,
+			},
+		},
+		{
+			// Webpart GitHub integration
+			path: '/projects/:projectId(\\d+)/settings/github',
+			name: 'project.settings.github',
+			component: () => import('@/views/project/settings/ProjectSettingsGithub.vue'),
 			meta: {
 				showAsModal: true,
 			},
@@ -686,6 +696,13 @@ router.beforeEach(async (to, from) => {
 		return {
 			hash: to.hash,
 			...newRoute,
+		}
+	}
+
+	if (authStore.authUser) {
+		const totpRedirect = await totpEnrollmentRedirect(to)
+		if (totpRedirect) {
+			return totpRedirect
 		}
 	}
 

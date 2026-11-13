@@ -1899,5 +1899,75 @@
     "projectInTrash": "This project is in the trash. It was deleted {since}.",
     "projectInTrashBy": "This project is in the trash. {user} deleted it {since}.",
     "projectInTrashByYou": "This project is in the trash. You deleted it {since}."
+  },
+  "webpart": {
+    "list": {
+      "groupBy": "Group by",
+      "groupNone": "No grouping",
+      "task": "Task",
+      "status": "Status",
+      "unassigned": "Unassigned",
+      "noLabel": "No label",
+      "open": "Open",
+      "today": "Today",
+      "next7Days": "Next 7 days",
+      "later": "Later"
+    },
+    "home": {
+      "yourTickets": "Your tickets",
+      "noTickets": "Nothing assigned to you right now.",
+      "deadlines": "Deadlines",
+      "next7Days": "Next 7 days",
+      "noDeadlines": "No deadlines in the next 7 days.",
+      "latestComments": "Latest comments",
+      "noComments": "No new comments on your tickets.",
+      "assignedToYou": "{count} assigned to you | {count} assigned to you",
+      "openBoard": "Open board",
+      "overdueBy": "Overdue by {count} day | Overdue by {count} days",
+      "tomorrow": "Tomorrow",
+      "inDays": "In {count} day | In {count} days"
+    },
+    "task": {
+      "details": "Details",
+      "openFullView": "Open full page"
+    },
+    "github": {
+      "development": "Development",
+      "noIdentifier": "Give the project an identifier (e.g. HS) to link branches and pull requests to its tasks.",
+      "noRepos": "No GitHub repository linked to this project yet.",
+      "linkRepo": "Link repository",
+      "appNotInstalled": "The Webpart Tasks GitHub App can't read {repo}. Install it on that repository.",
+      "nothingYet": "No branches or pull requests mention this task yet.",
+      "createBranch": "Create branch",
+      "repository": "Repository",
+      "baseBranch": "From branch",
+      "branchName": "Branch name",
+      "create": "Create",
+      "draft": "Draft",
+      "state": {
+        "open": "Open",
+        "merged": "Merged",
+        "closed": "Closed"
+      },
+      "ci": {
+        "success": "CI passed",
+        "failure": "CI failed",
+        "pending": "CI running",
+        "neutral": "CI finished"
+      },
+      "branchCreated": "Branch {name} created on GitHub.",
+      "repoLinked": "Repository linked.",
+      "repoUnlinked": "Repository unlinked.",
+      "settingsTitle": "GitHub",
+      "settingsIntro": "Branches and pull requests in these repositories that mention a task's identifier (like {key}) show up on that task, with their CI status.",
+      "needsIdentifier": "This project has no identifier yet. Set one in the project's edit settings, otherwise nothing can be matched.",
+      "noReposYet": "No repositories linked yet.",
+      "repoFormat": "Use owner/repository, e.g. Webpart-ro/hunting-store.ro.",
+      "unlink": "Unlink"
+    },
+    "totp": {
+      "required": "Two-factor authentication is required for all accounts. Set it up below to continue using Webpart Tasks.",
+      "cannotDisable": "Two-factor authentication is required on this instance and can't be turned off."
+    }
   }
 }

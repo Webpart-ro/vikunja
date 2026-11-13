@@ -80,6 +80,8 @@ function defaultConfig(): ConfigState {
 		available_migrators: [],
 		task_attachments_enabled: true,
 		totp_enabled: true,
+		totp_enforced: false,
+		github_enabled: false,
 		enabled_background_providers: [],
 		legal: {
 			links: [],

@@ -366,6 +366,48 @@ export type BotUserUpdateBody = {
     username?: string;
 };
 
+export type Branch = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * CI status of the branch head.
+     */
+    ci?: CiStatus;
+    /**
+     * The branch name.
+     */
+    name?: string;
+    /**
+     * The commit the branch points to.
+     */
+    sha?: string;
+    /**
+     * Link to the branch on GitHub.
+     */
+    url?: string;
+};
+
+export type BranchBasesBody = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * The repository's branches.
+     */
+    branches?: Array<string> | null;
+    /**
+     * The branch preselected as base: the configured default (develop) if the repository has it, otherwise its default branch.
+     */
+    default_base?: string;
+    /**
+     * The repository's default branch on GitHub.
+     */
+    default_branch?: string;
+};
+
 export type Bucket = {
     /**
      * A URL to the JSON Schema for this object.
@@ -440,6 +482,21 @@ export type BulkTaskCreation = {
     tasks?: Array<Task> | null;
 };
 
+export type CiStatus = {
+    /**
+     * Overall CI state of the commit: success, failure, pending or neutral. Empty when it has no checks.
+     */
+    state?: string;
+    /**
+     * How many check runs the commit has.
+     */
+    total?: number;
+    /**
+     * Link to the most relevant run (the failing one if any) on GitHub.
+     */
+    url?: string;
+};
+
 export type Callback = {
     /**
      * A URL to the JSON Schema for this object.
@@ -484,6 +541,25 @@ export type ConnectionSettings = {
             [key: string]: RouteDetail;
         };
     };
+};
+
+export type CreateBranchInput = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Branch to start from. Empty uses the configured default (develop), falling back to the repository's default branch.
+     */
+    base?: string;
+    /**
+     * The new branch name. Must mention the task identifier so the branch shows up on the task.
+     */
+    name?: string;
+    /**
+     * owner/repo; must be linked to the task's project.
+     */
+    repo?: string;
 };
 
 export type CreateInviteLinkBody = {
@@ -668,6 +744,25 @@ export type File = {
      * The size of the file in bytes.
      */
     readonly size?: number;
+};
+
+export type GithubWebhookResultBody = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * How many task comments were added.
+     */
+    comments?: number;
+    /**
+     * Whether the event led to any action.
+     */
+    handled?: boolean;
+    /**
+     * The tasks that got a comment.
+     */
+    task_ids?: Array<number> | null;
 };
 
 export type HealthBodyBody = {
@@ -1394,6 +1489,18 @@ export type PaginatedProject = {
     total_pages?: number;
 };
 
+export type PaginatedProjectGithubRepo = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    items?: Array<ProjectGithubRepo> | null;
+    page?: number;
+    per_page?: number;
+    total?: number;
+    total_pages?: number;
+};
+
 export type PaginatedProjectView = {
     /**
      * A URL to the JSON Schema for this object.
@@ -1743,6 +1850,33 @@ export type ProjectDuplicate = {
     parent_project_id?: number;
 };
 
+export type ProjectGithubRepo = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * When the repository was linked.
+     */
+    readonly created?: string;
+    /**
+     * The id of this repository link.
+     */
+    readonly id?: number;
+    /**
+     * The GitHub user or organization owning the repository, e.g. Webpart-ro.
+     */
+    owner?: string;
+    /**
+     * The project this repository is linked to. Set from the URL.
+     */
+    readonly project_id?: number;
+    /**
+     * The repository name, e.g. hunting-store.ro.
+     */
+    repo?: string;
+};
+
 export type ProjectReadBody = {
     /**
      * A URL to the JSON Schema for this object.
@@ -2020,6 +2154,49 @@ export type PublicInviteLink = {
     teams?: Array<InviteLinkTeam> | null;
 };
 
+export type PullRequest = {
+    /**
+     * GitHub login of the author.
+     */
+    author?: string;
+    /**
+     * The target branch.
+     */
+    base_ref?: string;
+    /**
+     * CI status of the pull request head.
+     */
+    ci?: CiStatus;
+    /**
+     * Whether the pull request is a draft.
+     */
+    draft?: boolean;
+    /**
+     * The source branch.
+     */
+    head_ref?: string;
+    /**
+     * The pull request number.
+     */
+    number?: number;
+    /**
+     * open, merged or closed.
+     */
+    state?: string;
+    /**
+     * The pull request title.
+     */
+    title?: string;
+    /**
+     * When the pull request last changed.
+     */
+    updated_at?: string;
+    /**
+     * Link to the pull request on GitHub.
+     */
+    url?: string;
+};
+
 export type Reaction = {
     /**
      * A URL to the JSON Schema for this object.
@@ -2066,6 +2243,29 @@ export type RenewTokenBodyBody = {
      * The renewed JWT auth token.
      */
     readonly token?: string;
+};
+
+export type RepoDevelopment = {
+    /**
+     * False when the GitHub App can't read this repository (not installed on it).
+     */
+    accessible?: boolean;
+    /**
+     * Branches whose name mentions the task identifier.
+     */
+    branches?: Array<Branch> | null;
+    /**
+     * owner/repo.
+     */
+    full_name?: string;
+    /**
+     * Pull requests whose title, description or branch mentions the task identifier.
+     */
+    pull_requests?: Array<PullRequest> | null;
+    /**
+     * Link to the repository.
+     */
+    url?: string;
 };
 
 export type RouteDetail = {
@@ -2568,6 +2768,25 @@ export type TaskCommentReadBody = {
      * A timestamp when this comment was last updated. You cannot change this value.
      */
     readonly updated?: string;
+};
+
+export type TaskDevelopmentBody = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Whether the GitHub integration is configured on this instance.
+     */
+    configured?: boolean;
+    /**
+     * The task identifier branches and pull requests are matched on, e.g. HS-334. Empty when the project has no identifier.
+     */
+    key?: string;
+    /**
+     * One entry per repository linked to the task's project.
+     */
+    repositories?: Array<RepoDevelopment> | null;
 };
 
 export type TaskDuplicate = {
@@ -3955,6 +4174,10 @@ export type VikunjaInfos = {
      */
     frontend_url?: string;
     /**
+     * Whether the GitHub integration (branches, pull requests and CI on tasks) is configured.
+     */
+    github_enabled?: boolean;
+    /**
      * Links to the instance's legal documents.
      */
     legal?: LegalInfo;
@@ -3990,6 +4213,10 @@ export type VikunjaInfos = {
      * Whether TOTP two-factor authentication is enabled.
      */
     totp_enabled?: boolean;
+    /**
+     * Whether local accounts must enable TOTP two-factor authentication before using the API.
+     */
+    totp_enforced?: boolean;
     /**
      * Whether users may delete their own account.
      */
@@ -4197,6 +4424,40 @@ export type BotUserUpdateBodyWritable = {
     username?: string;
 };
 
+export type BranchWritable = {
+    /**
+     * CI status of the branch head.
+     */
+    ci?: CiStatus;
+    /**
+     * The branch name.
+     */
+    name?: string;
+    /**
+     * The commit the branch points to.
+     */
+    sha?: string;
+    /**
+     * Link to the branch on GitHub.
+     */
+    url?: string;
+};
+
+export type BranchBasesBodyWritable = {
+    /**
+     * The repository's branches.
+     */
+    branches?: Array<string> | null;
+    /**
+     * The branch preselected as base: the configured default (develop) if the repository has it, otherwise its default branch.
+     */
+    default_base?: string;
+    /**
+     * The repository's default branch on GitHub.
+     */
+    default_branch?: string;
+};
+
 export type BucketWritable = {
     count?: number;
     created?: string;
@@ -4268,6 +4529,21 @@ export type ConnectionSettingsWritable = {
             [key: string]: RouteDetail;
         };
     };
+};
+
+export type CreateBranchInputWritable = {
+    /**
+     * Branch to start from. Empty uses the configured default (develop), falling back to the repository's default branch.
+     */
+    base?: string;
+    /**
+     * The new branch name. Must mention the task identifier so the branch shows up on the task.
+     */
+    name?: string;
+    /**
+     * owner/repo; must be linked to the task's project.
+     */
+    repo?: string;
 };
 
 export type CreateInviteLinkBodyWritable = {
@@ -4351,6 +4627,21 @@ export type DetectionResultWritable = {
 
 export type EmailConfirmWritable = {
     token?: string;
+};
+
+export type GithubWebhookResultBodyWritable = {
+    /**
+     * How many task comments were added.
+     */
+    comments?: number;
+    /**
+     * Whether the event led to any action.
+     */
+    handled?: boolean;
+    /**
+     * The tasks that got a comment.
+     */
+    task_ids?: Array<number> | null;
 };
 
 export type HealthBodyBodyWritable = {
@@ -4658,6 +4949,14 @@ export type PaginatedProjectWritable = {
     total_pages?: number;
 };
 
+export type PaginatedProjectGithubRepoWritable = {
+    items?: Array<ProjectGithubRepoWritable> | null;
+    page?: number;
+    per_page?: number;
+    total?: number;
+    total_pages?: number;
+};
+
 export type PaginatedProjectViewWritable = {
     items?: Array<ProjectViewWritable> | null;
     page?: number;
@@ -4863,6 +5162,17 @@ export type ProjectDuplicateWritable = {
     parent_project_id?: number;
 };
 
+export type ProjectGithubRepoWritable = {
+    /**
+     * The GitHub user or organization owning the repository, e.g. Webpart-ro.
+     */
+    owner?: string;
+    /**
+     * The repository name, e.g. hunting-store.ro.
+     */
+    repo?: string;
+};
+
 export type ProjectReadBodyWritable = {
     /**
      * The description of the project.
@@ -5015,6 +5325,29 @@ export type RegisterUserRequestWritable = {
     username?: string;
 };
 
+export type RepoDevelopmentWritable = {
+    /**
+     * False when the GitHub App can't read this repository (not installed on it).
+     */
+    accessible?: boolean;
+    /**
+     * Branches whose name mentions the task identifier.
+     */
+    branches?: Array<BranchWritable> | null;
+    /**
+     * owner/repo.
+     */
+    full_name?: string;
+    /**
+     * Pull requests whose title, description or branch mentions the task identifier.
+     */
+    pull_requests?: Array<PullRequest> | null;
+    /**
+     * Link to the repository.
+     */
+    url?: string;
+};
+
 export type SavedFilterWritable = {
     /**
      * The description of the filter.
@@ -5137,6 +5470,21 @@ export type TaskCommentReadBodyWritable = {
      * The comment text. May contain HTML; mentions are parsed and notify the mentioned users.
      */
     comment?: string;
+};
+
+export type TaskDevelopmentBodyWritable = {
+    /**
+     * Whether the GitHub integration is configured on this instance.
+     */
+    configured?: boolean;
+    /**
+     * The task identifier branches and pull requests are matched on, e.g. HS-334. Empty when the project has no identifier.
+     */
+    key?: string;
+    /**
+     * One entry per repository linked to the task's project.
+     */
+    repositories?: Array<RepoDevelopmentWritable> | null;
 };
 
 export type TaskDuplicateWritable = {
@@ -5737,6 +6085,10 @@ export type VikunjaInfosWritable = {
      */
     frontend_url?: string;
     /**
+     * Whether the GitHub integration (branches, pull requests and CI on tasks) is configured.
+     */
+    github_enabled?: boolean;
+    /**
      * Links to the instance's legal documents.
      */
     legal?: LegalInfo;
@@ -5772,6 +6124,10 @@ export type VikunjaInfosWritable = {
      * Whether TOTP two-factor authentication is enabled.
      */
     totp_enabled?: boolean;
+    /**
+     * Whether local accounts must enable TOTP two-factor authentication before using the API.
+     */
+    totp_enforced?: boolean;
     /**
      * Whether users may delete their own account.
      */
@@ -6644,6 +7000,36 @@ export type InfoResponses = {
 };
 
 export type InfoResponse = InfoResponses[keyof InfoResponses];
+
+export type GithubWebhookData = {
+    body: Blob | File;
+    headers?: {
+        'X-GitHub-Event'?: string;
+        'X-Hub-Signature-256'?: string;
+        'X-GitHub-Delivery'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/integrations/github/webhook';
+};
+
+export type GithubWebhookErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type GithubWebhookError = GithubWebhookErrors[keyof GithubWebhookErrors];
+
+export type GithubWebhookResponses = {
+    /**
+     * Accepted
+     */
+    202: GithubWebhookResultBody;
+};
+
+export type GithubWebhookResponse = GithubWebhookResponses[keyof GithubWebhookResponses];
 
 export type InviteLinksCheckData = {
     body: InviteLinkCheckBodyWritable;
@@ -8281,6 +8667,101 @@ export type ProjectsBackgroundUploadResponses = {
 
 export type ProjectsBackgroundUploadResponse = ProjectsBackgroundUploadResponses[keyof ProjectsBackgroundUploadResponses];
 
+export type ProjectGithubReposListData = {
+    body?: never;
+    path: {
+        project: number;
+    };
+    query?: {
+        /**
+         * 1-based page number.
+         */
+        page?: number;
+        /**
+         * Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.
+         */
+        per_page?: number;
+        /**
+         * Search query; filters the list to items matching this string.
+         */
+        q?: string;
+    };
+    url: '/projects/{project}/github/repos';
+};
+
+export type ProjectGithubReposListErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type ProjectGithubReposListError = ProjectGithubReposListErrors[keyof ProjectGithubReposListErrors];
+
+export type ProjectGithubReposListResponses = {
+    /**
+     * OK
+     */
+    200: PaginatedProjectGithubRepo;
+};
+
+export type ProjectGithubReposListResponse = ProjectGithubReposListResponses[keyof ProjectGithubReposListResponses];
+
+export type ProjectGithubReposCreateData = {
+    body: ProjectGithubRepoWritable;
+    path: {
+        project: number;
+    };
+    query?: never;
+    url: '/projects/{project}/github/repos';
+};
+
+export type ProjectGithubReposCreateErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type ProjectGithubReposCreateError = ProjectGithubReposCreateErrors[keyof ProjectGithubReposCreateErrors];
+
+export type ProjectGithubReposCreateResponses = {
+    /**
+     * Created
+     */
+    201: ProjectGithubRepo;
+};
+
+export type ProjectGithubReposCreateResponse = ProjectGithubReposCreateResponses[keyof ProjectGithubReposCreateResponses];
+
+export type ProjectGithubReposDeleteData = {
+    body?: never;
+    path: {
+        project: number;
+        repo: number;
+    };
+    query?: never;
+    url: '/projects/{project}/github/repos/{repo}';
+};
+
+export type ProjectGithubReposDeleteErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type ProjectGithubReposDeleteError = ProjectGithubReposDeleteErrors[keyof ProjectGithubReposDeleteErrors];
+
+export type ProjectGithubReposDeleteResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type ProjectGithubReposDeleteResponse = ProjectGithubReposDeleteResponses[keyof ProjectGithubReposDeleteResponses];
+
 export type SharesListData = {
     body?: never;
     path: {
@@ -9868,6 +10349,92 @@ export type TasksTrashCountResponses = {
 };
 
 export type TasksTrashCountResponse = TasksTrashCountResponses[keyof TasksTrashCountResponses];
+
+export type TaskDevelopmentReadData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/{id}/development';
+};
+
+export type TaskDevelopmentReadErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type TaskDevelopmentReadError = TaskDevelopmentReadErrors[keyof TaskDevelopmentReadErrors];
+
+export type TaskDevelopmentReadResponses = {
+    /**
+     * OK
+     */
+    200: TaskDevelopmentBody;
+};
+
+export type TaskDevelopmentReadResponse = TaskDevelopmentReadResponses[keyof TaskDevelopmentReadResponses];
+
+export type TaskDevelopmentBasesData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: {
+        /**
+         * owner/repo; must be linked to the task's project.
+         */
+        repo?: string;
+    };
+    url: '/tasks/{id}/development/bases';
+};
+
+export type TaskDevelopmentBasesErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type TaskDevelopmentBasesError = TaskDevelopmentBasesErrors[keyof TaskDevelopmentBasesErrors];
+
+export type TaskDevelopmentBasesResponses = {
+    /**
+     * OK
+     */
+    200: BranchBasesBody;
+};
+
+export type TaskDevelopmentBasesResponse = TaskDevelopmentBasesResponses[keyof TaskDevelopmentBasesResponses];
+
+export type TaskDevelopmentBranchCreateData = {
+    body: CreateBranchInputWritable;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/{id}/development/branches';
+};
+
+export type TaskDevelopmentBranchCreateErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type TaskDevelopmentBranchCreateError = TaskDevelopmentBranchCreateErrors[keyof TaskDevelopmentBranchCreateErrors];
+
+export type TaskDevelopmentBranchCreateResponses = {
+    /**
+     * Created
+     */
+    201: Branch;
+};
+
+export type TaskDevelopmentBranchCreateResponse = TaskDevelopmentBranchCreateResponses[keyof TaskDevelopmentBranchCreateResponses];
 
 export type TaskTimeEntriesListData = {
     body?: never;
