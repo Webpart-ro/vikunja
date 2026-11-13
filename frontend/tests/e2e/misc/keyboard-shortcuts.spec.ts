@@ -12,7 +12,7 @@ async function pressLayoutKey(page: Page, init: KeyboardEventInit) {
 test.describe('Keyboard layouts', () => {
 	test('opens help with a Danish question mark, but not underscore', async ({authenticatedPage: page}) => {
 		await page.goto('/')
-		await expect(page.locator('.menu-container')).toBeVisible()
+		await expect(page.locator('.icon-rail')).toBeVisible()
 		const help = page.locator('.keyboard-shortcuts')
 		await pressLayoutKey(page, {
 			key: '_',
@@ -33,7 +33,7 @@ test.describe('Keyboard layouts', () => {
 	for (const [layout, key, code] of [['Dvorak', 'k', 'KeyV'], ['Russian', 'л', 'KeyK']]) {
 		test(`opens quick search on ${layout}`, async ({authenticatedPage: page}) => {
 			await page.goto('/')
-			await expect(page.locator('.menu-container')).toBeVisible()
+			await expect(page.locator('.icon-rail')).toBeVisible()
 			await pressLayoutKey(page, {
 				key,
 				code,
@@ -45,7 +45,7 @@ test.describe('Keyboard layouts', () => {
 
 	test('navigates with a Dvorak sequence', async ({authenticatedPage: page}) => {
 		await page.goto('/projects')
-		await expect(page.locator('.menu-container')).toBeVisible()
+		await expect(page.locator('.icon-rail')).toBeVisible()
 		await pressLayoutKey(page, {
 			key: 'g',
 			code: 'KeyU',
@@ -63,7 +63,8 @@ test.describe('Keyboard layouts', () => {
 		await page.goto('/projects/1/1')
 		const row = page.locator('.tasks .single-task').first()
 		await expect(row).toBeVisible()
-		await page.locator('.project-title').click()
+		// Webpart: click a neutral spot (the title is now the project switcher dropdown)
+		await page.locator('.list-columns-header').click()
 		await pressLayoutKey(page, {
 			key: 'j',
 			code: 'KeyC',

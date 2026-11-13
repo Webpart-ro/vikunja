@@ -43,9 +43,8 @@ func TestHumaUserShow(t *testing.T) {
 	body := rec.Body.String()
 	assert.Contains(t, body, `"id":1`)
 	assert.Contains(t, body, `"username":"user1"`)
-	// Like v1, /user does not disclose the email (GetUserByID strips it); the
-	// json:"email,omitempty" tag then drops the field entirely.
-	assert.NotContains(t, body, `"email":""`)
+	// Webpart: the own profile includes the own email (used by apps that log in via Vikunja).
+	assert.Contains(t, body, `"email":"user1@example.com"`)
 	// Computed account facts v1 returned alongside the user object.
 	assert.Contains(t, body, `"auth_provider":"local"`)
 	assert.Contains(t, body, `"is_local_user":true`)

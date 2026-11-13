@@ -96,7 +96,7 @@ const props = withDefaults(defineProps<{
 	enabled?: boolean,
 	overflow?: boolean,
 	wide?: boolean,
-	variant?: 'default' | 'hint-modal' | 'scrolling' | 'top' | 'fullscreen' | 'sheet',
+	variant?: 'default' | 'hint-modal' | 'scrolling' | 'top' | 'fullscreen' | 'sheet' | 'drawer',
 	title?: string,
 }>(), {
 	enabled: true,
@@ -432,6 +432,61 @@ $modal-width: 1024px;
 .is-wide {
 	max-inline-size: $desktop;
 	inline-size: calc(100% - 2rem);
+}
+
+// Webpart: right-side panel, used for the task detail view.
+// Below $tablet it falls back to the fullscreen mobile layout further down.
+.drawer {
+	background: hsla(var(--grey-900-hsl, 222.2, 47.4%, 11.2%), .25);
+
+	@media screen and (min-width: $tablet) {
+		.modal-container {
+			overflow: hidden;
+			padding: 0;
+		}
+
+		.modal-content {
+			position: fixed;
+			inset-block: 0;
+			inset-inline-end: 0;
+			inline-size: min(880px, calc(100% - #{$rail-width}));
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			background: var(--white);
+			color: var(--text);
+			border-inline-start: 1px solid var(--grey-200);
+			box-shadow: -12px 0 32px hsla(var(--grey-500-hsl), .18);
+			transform: translateX(0);
+			transition: transform 200ms ease;
+
+			@starting-style {
+				transform: translateX(24px);
+			}
+		}
+
+		.close {
+			position: fixed;
+			z-index: 2;
+			inset-block-start: .75rem;
+			inset-inline-end: 1rem;
+			transform: none;
+			inline-size: 2.25rem;
+			block-size: 2.25rem;
+			border-radius: var(--radius-md);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 1.1rem;
+			color: var(--grey-500);
+			background: var(--white);
+
+			&:hover,
+			&:focus-visible {
+				background: var(--grey-100);
+				color: var(--grey-800);
+			}
+		}
+	}
 }
 
 // no centering transform: it would trap fixed descendants in a small containing block

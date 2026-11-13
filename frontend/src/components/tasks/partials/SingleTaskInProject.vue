@@ -5,7 +5,7 @@
 	>
 		<div
 			ref="taskRoot"
-			:class="{'is-loading': isLoading}"
+			:class="{'is-loading': isLoading, 'is-columns': columns}"
 			class="task loader-container single-task"
 			tabindex="-1"
 			:data-is-overdue="isOverdue || undefined"
@@ -80,46 +80,60 @@
 					v-if="(task.assignees?.length ?? 0) > 0"
 					:assignees="task.assignees ?? []"
 					:avatar-size="25"
-					class="mis-1"
+					class="mis-1 cell-assignees"
 					:inline="true"
 				/>
+				<span
+					v-else-if="columns"
+					class="cell-assignees cell-empty"
+					aria-hidden="true"
+				>—</span>
 
-				<Popup
+				<span
 					v-if="task.due_date && +new Date(task.due_date) > 0"
-					placement="bottom-start"
-					:anchor="dueDateTriggerEl"
-					sheet-on-mobile
-					:sheet-title="$t('task.deferDueDate.title')"
+					class="cell-due"
 				>
-					<template #trigger="{toggle, isOpen}">
-						<BaseButton
-							ref="dueDateTrigger"
-							v-tooltip="formatDateLong(task.due_date)"
-							class="dueDate"
-							@click.prevent.stop="toggle()"
-						>
-							<OverdueIndicator
-								v-if="isOverdue"
-								class="mie-1"
-							/>
-							<time
-								:datetime="formatISO(task.due_date)"
-								class="is-italic"
-								:aria-expanded="isOpen ? 'true' : 'false'"
+					<Popup
+						placement="bottom-start"
+						:anchor="dueDateTriggerEl"
+						sheet-on-mobile
+						:sheet-title="$t('task.deferDueDate.title')"
+					>
+						<template #trigger="{toggle, isOpen}">
+							<BaseButton
+								ref="dueDateTrigger"
+								v-tooltip="formatDateLong(task.due_date)"
+								class="dueDate"
+								@click.prevent.stop="toggle()"
 							>
-								{{ $t('task.detail.due', {at: dueDateFormatted}) }}
-							</time>
-						</BaseButton>
-					</template>
-					<template #content="{isOpen}">
-						<DeferTask
-							v-if="isOpen"
-							:model-value="task"
-						/>
-					</template>
-				</Popup>
+								<OverdueIndicator
+									v-if="isOverdue"
+									class="mie-1"
+								/>
+								<time
+									:datetime="formatISO(task.due_date)"
+									class="is-italic"
+									:aria-expanded="isOpen ? 'true' : 'false'"
+								>
+									{{ $t('task.detail.due', {at: dueDateFormatted}) }}
+								</time>
+							</BaseButton>
+						</template>
+						<template #content="{isOpen}">
+							<DeferTask
+								v-if="isOpen"
+								:model-value="task"
+							/>
+						</template>
+					</Popup>
+				</span>
+				<span
+					v-else-if="columns"
+					class="cell-due cell-empty"
+					aria-hidden="true"
+				>—</span>
 
-				<span>
+				<span class="cell-icons">
 					<span
 						v-if="(task.attachments?.length ?? 0) > 0"
 						class="project-task-icon"
@@ -258,12 +272,15 @@ const props = withDefaults(defineProps<{
 	disabled?: boolean,
 	canMarkAsDone?: boolean,
 	allTasks?: ITask[],
+	// Webpart: render assignee/due as fixed-width aligned cells (project list view)
+	columns?: boolean,
 }>(), {
 	isArchived: false,
 	showProject: false,
 	disabled: false,
 	canMarkAsDone: true,
 	allTasks: () => [],
+	columns: false,
 })
 
 const emit = defineEmits<{

@@ -17,8 +17,7 @@ test.describe('OpenID Login', () => {
 
 		// Should redirect back to the app
 		await expect(page).toHaveURL(/\//)
-		await expect(page.locator('main.app-content .content h1')).toContainText('test')
-		await expect(page.locator('.show-tasks h2')).toContainText('Current Tasks')
+		await expect(page.locator('.dashboard__title')).toContainText('test')
 	})
 
 })

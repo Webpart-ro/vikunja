@@ -34,7 +34,8 @@ async function seedTasks(apiContext: APIRequestContext, numberOfTasks = 50, star
 	return {tasks, project}
 }
 
-test.describe('Home Page Task Overview', () => {
+// Webpart: the home page is now a dashboard (your tickets, deadlines, comments) instead of the date-sorted task list these tests cover.
+test.describe.skip('Home Page Task Overview', () => {
 	test('Should show tasks with a near due date first on the home page overview', async ({authenticatedPage: page, apiContext}) => {
 		const taskCount = 50
 		const {tasks} = await seedTasks(apiContext, taskCount)

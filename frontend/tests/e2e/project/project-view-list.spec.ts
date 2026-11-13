@@ -131,7 +131,8 @@ test.describe('Project View List', () => {
 		})
 		await page.goto(`/projects/${projects[0].id}/1`)
 
-		await expect(page.locator('.menu-list li .list-menu-link .color-bubble')).toHaveCSS('background-color', 'rgb(0, 219, 96)')
+		// Webpart: the project colour shows as the dot next to the header title
+		await expect(page.locator('.project-switcher__trigger .project-switcher__dot')).toHaveCSS('background-color', 'rgb(0, 219, 96)')
 		await expect(page.locator('.tasks .color-bubble')).not.toBeVisible()
 	})
 

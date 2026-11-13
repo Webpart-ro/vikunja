@@ -9,9 +9,9 @@ import {UserFactory} from '../../factories/user'
 import {UserProjectFactory} from '../../factories/users_project'
 
 // Pick a project in the form's project picker. Waits for the project store to
-// hydrate (the sidebar shows it) before searching so the result is there.
+// hydrate before searching so the result is there.
 async function selectProject(page: Page, form: Locator, title: string) {
-	await expect(page.locator('.menu-container').getByText(title)).toBeVisible()
+	await page.waitForLoadState('networkidle')
 	const input = form.locator('.multiselect').first().locator('input')
 	await input.click()
 	// pressSequentially (not fill) so the multiselect's @keyup search fires.
@@ -48,7 +48,7 @@ test.describe('Time tracking', () => {
 
 		test('shows the page and the sidebar entry', async ({authenticatedPage: page}) => {
 			await page.goto('/')
-			await expect(page.locator('.menu-container').getByRole('link', {name: 'Time tracking'})).toBeVisible()
+			await expect(page.locator('.icon-rail').getByRole('link', {name: 'Time tracking'})).toBeVisible()
 
 			await page.goto('/time-tracking')
 			await expect(page.locator('[data-cy="addTimeEntry"]')).toBeVisible()
@@ -538,7 +538,7 @@ test.describe('Time tracking', () => {
 
 		test('hides the sidebar entry and blocks the route', async ({authenticatedPage: page}) => {
 			await page.goto('/')
-			await expect(page.locator('.menu-container').getByRole('link', {name: 'Time tracking'})).toHaveCount(0)
+			await expect(page.locator('.icon-rail').getByRole('link', {name: 'Time tracking'})).toHaveCount(0)
 
 			await page.goto('/time-tracking')
 			await expect(page.locator('[data-cy="addTimeEntry"]')).not.toBeVisible()

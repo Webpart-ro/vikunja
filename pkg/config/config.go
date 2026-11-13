@@ -64,6 +64,9 @@ const (
 	ServiceTimeZone                       Key = `service.timezone`
 	ServiceEnableTaskComments             Key = `service.enabletaskcomments`
 	ServiceEnableTotp                     Key = `service.enabletotp`
+	ServiceEnforceTotp                    Key = `service.enforcetotp`
+	ServiceEnforceTotpExemptUsers         Key = `service.enforcetotpexemptusers`
+	ServiceOAuthTrustedRedirectURIs       Key = `service.oauthtrustedredirecturis`
 	ServiceTestingtoken                   Key = `service.testingtoken`
 	ServiceEnableEmailReminders           Key = `service.enableemailreminders`
 	ServiceEnableUserDeletion             Key = `service.enableuserdeletion`
@@ -233,7 +236,16 @@ const (
 	DefaultSettingsTimezone                    Key = `defaultsettings.timezone`
 	DefaultSettingsOverdueTaskRemindersTime    Key = `defaultsettings.overdue_tasks_reminders_time`
 
-	WebhooksEnabled             Key = `webhooks.enabled`
+	WebhooksEnabled Key = `webhooks.enabled`
+
+	// Webpart GitHub integration
+	GithubEnabled               Key = `github.enabled`
+	GithubAppID                 Key = `github.appid`
+	GithubPrivateKeyPath        Key = `github.privatekeypath`
+	GithubWebhookSecret         Key = `github.webhooksecret` //nolint:gosec // config key name, not a credential
+	GithubBotUsername           Key = `github.botusername`
+	GithubAPIURL                Key = `github.apiurl`
+	GithubDefaultBase           Key = `github.defaultbasebranch`
 	WebhooksTimeoutSeconds      Key = `webhooks.timeoutseconds`
 	WebhooksProxyURL            Key = `webhooks.proxyurl`
 	WebhooksProxyPassword       Key = `webhooks.proxypassword`
@@ -399,6 +411,9 @@ func initDefaultConfig() {
 	ServiceTimeZone.setDefault("GMT")
 	ServiceEnableTaskComments.setDefault(true)
 	ServiceEnableTotp.setDefault(true)
+	ServiceEnforceTotp.setDefault(false)
+	ServiceEnforceTotpExemptUsers.setDefault([]string{})
+	ServiceOAuthTrustedRedirectURIs.setDefault([]string{})
 	ServiceEnableEmailReminders.setDefault(true)
 	ServiceEnableUserDeletion.setDefault(true)
 	ServiceMaxAvatarSize.setDefault(1024)
@@ -532,6 +547,14 @@ func initDefaultConfig() {
 	DefaultSettingsOverdueTaskRemindersTime.setDefault("9:00")
 	// Webhook
 	WebhooksEnabled.setDefault(true)
+
+	GithubEnabled.setDefault(false)
+	GithubAppID.setDefault("")
+	GithubPrivateKeyPath.setDefault("")
+	GithubWebhookSecret.setDefault("")
+	GithubBotUsername.setDefault("")
+	GithubAPIURL.setDefault("https://api.github.com")
+	GithubDefaultBase.setDefault("develop")
 	WebhooksTimeoutSeconds.setDefault(30)
 	WebhooksAllowNonRoutableIPs.setDefault(false)
 	// Audit

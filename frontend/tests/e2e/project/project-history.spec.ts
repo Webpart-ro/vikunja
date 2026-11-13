@@ -53,16 +53,16 @@ test.describe('Project History', () => {
 			)
 		}
 
-		await page.locator('nav.menu.top-menu a').filter({hasText: 'Overview'}).click()
+		await page.locator('.icon-rail').getByRole('link', {name: 'Overview'}).click()
 
 		await expect(page.locator('body')).toContainText('Last viewed')
-		await expect(page.locator('.project-grid')).not.toContainText(projects[0].title)
-		await expect(page.locator('.project-grid')).toContainText(projects[1].title)
-		await expect(page.locator('.project-grid')).toContainText(projects[2].title)
-		await expect(page.locator('.project-grid')).toContainText(projects[3].title)
-		await expect(page.locator('.project-grid')).toContainText(projects[4].title)
-		await expect(page.locator('.project-grid')).toContainText(projects[5].title)
-		await expect(page.locator('.project-grid')).toContainText(projects[6].title)
+		await expect(page.locator('.project-strip')).not.toContainText(projects[0].title)
+		await expect(page.locator('.project-strip')).toContainText(projects[1].title)
+		await expect(page.locator('.project-strip')).toContainText(projects[2].title)
+		await expect(page.locator('.project-strip')).toContainText(projects[3].title)
+		await expect(page.locator('.project-strip')).toContainText(projects[4].title)
+		await expect(page.locator('.project-strip')).toContainText(projects[5].title)
+		await expect(page.locator('.project-strip')).toContainText(projects[6].title)
 	})
 
 	test('should hide the last viewed section when showLastViewed setting is disabled', async ({authenticatedPage: page, apiContext}) => {

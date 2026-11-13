@@ -93,7 +93,9 @@ test('moving a favourite task to another project keeps it in Favorites and drops
 	await expect(page.locator('.kanban .bucket').first()).toBeVisible()
 	await expect(page.locator('.kanban .bucket .tasks .task').filter({hasText: task.title})).toHaveCount(0)
 
-	await page.locator('li[data-project-id="-1"] .list-menu-link').first().click()
+	// Webpart: Favorites is reached through the header project switcher
+	await page.locator('.project-switcher__trigger').click()
+	await page.locator('.project-switcher__item[href="/projects/-1"]').click()
 	await expect(page).toHaveURL(/\/projects\/-1\//)
 	await expect(page.locator('.tasks .task').filter({hasText: task.title})).toBeVisible()
 

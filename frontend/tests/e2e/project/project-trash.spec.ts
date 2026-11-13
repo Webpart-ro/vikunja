@@ -88,7 +88,8 @@ test.describe('Project trash', () => {
 
 		await row.locator('[data-cy="restoreProject"]').click()
 		await expect(page.locator('[data-cy="trashedProject"]')).toHaveCount(0)
-		await expect(page.locator('.menu-container').getByText('First Project')).toBeVisible()
+		await page.goto('/projects')
+		await expect(page.locator('.project-grid').getByText('First Project')).toBeVisible()
 
 		for (const id of [1, 2]) {
 			const stored = await apiContext.get(`projects/${id}`, {headers: {Authorization: `Bearer ${userToken}`}})

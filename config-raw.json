@@ -99,6 +99,21 @@
                     "comment": "Whether totp is enabled. In most cases you want to leave that enabled."
                 },
                 {
+                    "key": "oauthtrustedredirecturis",
+                    "default_value": "[]",
+                    "comment": "Extra https redirect URIs the built-in OAuth 2.0 server may send authorization codes to, besides native-app schemes and loopback addresses. Each entry must match the requested redirect_uri exactly. Lets a trusted web app (e.g. a self-hosted wiki) use Vikunja accounts for login. As an environment variable, separate entries with commas."
+                },
+                {
+                    "key": "enforcetotpexemptusers",
+                    "default_value": "[]",
+                    "comment": "Usernames of service accounts (e.g. a CI bot) whose API tokens keep working while enforcetotp is on. Only requests authenticated with an API token are exempt; logging in as these users in a browser still requires TOTP. As an environment variable, separate usernames with commas."
+                },
+                {
+                    "key": "enforcetotp",
+                    "default_value": "false",
+                    "comment": "If enabled, every local account must turn on TOTP two-factor authentication. Until they do, the API only allows the requests needed to set it up (reading the own user, the TOTP settings, token refresh and logout). Accounts from OpenID providers are exempt; enforce 2FA at the provider instead. Requires `enabletotp`."
+                },
+                {
                     "key": "testingtoken",
                     "default_value": "",
                     "comment": "If not empty, this will enable `/test/{table}` endpoints which allow to put any content in the database.\nUsed to reset the db before frontend tests. Because this is quite a dangerous feature allowing for lots of harm,\neach request made to this endpoint needs to provide an `Authorization: \u003ctoken\u003e` header with the token from below. \u003cbr/\u003e\n**You should never use this unless you know exactly what you're doing**"
@@ -1063,6 +1078,47 @@
                     "key": "timezone",
                     "default_value": "\u003ctime zone set at service.timezone\u003e",
                     "comment": "The time zone of each individual user. This will affect when users get reminders and overdue task emails."
+                }
+            ]
+        },
+        {
+            "key": "github",
+            "comment": "Webpart GitHub integration: shows branches, pull requests and CI runs that mention a task's identifier (e.g. HS-334) on the task, lets users create branches from a task, and comments on tasks when GitHub reports a staging or production deployment. Needs a GitHub App installed on the organization.",
+            "children": [
+                {
+                    "key": "enabled",
+                    "default_value": "false",
+                    "comment": "Whether the GitHub integration is enabled."
+                },
+                {
+                    "key": "appid",
+                    "default_value": "",
+                    "comment": "The GitHub App's numeric App ID."
+                },
+                {
+                    "key": "privatekeypath",
+                    "default_value": "",
+                    "comment": "Path to the GitHub App's private key (.pem file). Keep it readable only by Vikunja."
+                },
+                {
+                    "key": "webhooksecret",
+                    "default_value": "",
+                    "comment": "The GitHub App's webhook secret, used to verify the X-Hub-Signature-256 header on /api/v2/integrations/github/webhook. Webhooks are rejected while this is empty."
+                },
+                {
+                    "key": "botusername",
+                    "default_value": "",
+                    "comment": "Username of the Vikunja account that posts deployment comments on tasks (e.g. a bot user). Deployment comments are off while this is empty."
+                },
+                {
+                    "key": "apiurl",
+                    "default_value": "https://api.github.com",
+                    "comment": "The GitHub REST API base URL. Only change this for GitHub Enterprise Server."
+                },
+                {
+                    "key": "defaultbasebranch",
+                    "default_value": "develop",
+                    "comment": "The branch new branches are created from by default. Users can pick another one; repositories without it fall back to their default branch."
                 }
             ]
         },

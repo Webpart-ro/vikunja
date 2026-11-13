@@ -21,6 +21,7 @@
 					'filter': backgroundBrightness ? `brightness(${backgroundBrightness}%)` : undefined
 				}"
 			/>
+			<IconRail />
 			<Navigation class="d-print-none" />
 			<main
 				id="main-content"
@@ -52,7 +53,7 @@
 
 				<Modal
 					:enabled="typeof currentModal !== 'undefined'"
-					variant="scrolling"
+					variant="drawer"
 					class="task-detail-view-modal"
 					:aria-label="$t('task.detail.title')"
 					@close="closeModal()"
@@ -82,6 +83,7 @@ import {useRoute, useRouter} from 'vue-router'
 
 import {SHORTCUTS} from '@/constants/shortcuts'
 import Navigation from '@/components/home/Navigation.vue'
+import IconRail from '@/components/home/IconRail.vue'
 import QuickActions from '@/components/quick-actions/QuickActions.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 
@@ -136,6 +138,15 @@ watch(() => route.name as string, (routeName) => {
 		baseStore.setCurrentProject(null)
 	}
 })
+
+// Webpart: project settings pages (opened directly or after a reload, without the board behind
+// them) don't all set the current project, which left the header's project title empty.
+watch(() => [route.name, route.params.projectId] as const, ([routeName, projectIdParam]) => {
+	const projectId = Number(projectIdParam)
+	if (typeof routeName === 'string' && routeName.startsWith('project.settings') && projectId > 0 && baseStore.currentProjectId !== projectId) {
+		baseStore.setCurrentProject({id: projectId})
+	}
+}, {immediate: true})
 
 // TODO: Reset the title if the page component does not set one itself
 
@@ -210,13 +221,10 @@ onBeforeUnmount(() => {
 
 	@media screen and (min-width: $tablet) {
 		padding: $navbar-height + 1.5rem 1.5rem 0 1.5rem;
+		margin-inline-start: $rail-width;
 	}
 
-	&.is-menu-enabled {
-		@media screen and (min-width: $tablet) {
-			margin-inline-start: var(--sidebar-width);
-		}
-	}
+	// Webpart: no project sidebar on desktop; projects are switched from the header title
 
 	// Used to make sure the spinner is always in the middle while loading
 	> .loader-container {

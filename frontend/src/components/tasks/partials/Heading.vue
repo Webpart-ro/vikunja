@@ -6,7 +6,27 @@
 					v-if="task.hex_color !== ''"
 					:color="getHexColor(task.hex_color)"
 				/>
-				<BaseButton @click="copyUrl">
+				<!-- Webpart: in the side panel the ID opens the ticket's full page; a plain link so
+				     the page loads without the board backdrop (and middle-click opens a new tab) -->
+				<a
+					v-if="hasClose"
+					v-tooltip="$t('webpart.task.openFullView')"
+					:href="fullViewHref"
+					class="task-id-link"
+					@click="openFullView"
+				>
+					<span class="title task-id">
+						{{ textIdentifier }}
+					</span>
+					<Icon
+						icon="arrow-up-right-from-square"
+						class="task-id-link__icon"
+					/>
+				</a>
+				<BaseButton
+					v-else
+					@click="copyUrl"
+				>
 					<span class="title task-id">
 						{{ textIdentifier }}
 					</span>
@@ -98,6 +118,20 @@ async function copyUrl() {
 	const absoluteURL = new URL(route.href, window.location.href).href
 
 	await copy(absoluteURL)
+}
+
+const fullViewHref = computed(() => router.resolve({name: 'task.detail', params: {id: props.task.id}}).href)
+
+// The panel and the full page share the URL; the panel only exists because history.state
+// carries a backdropView. Drop it and reload so the same URL renders as the full page.
+// Modifier/middle clicks keep the browser's default (open in a new tab).
+function openFullView(event: MouseEvent) {
+	if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+	event.preventDefault()
+	const state = {...(window.history.state ?? {})}
+	delete state.backdropView
+	window.history.replaceState(state, '', fullViewHref.value)
+	window.location.reload()
 }
 
 const updateTask = useUpdateTaskMutation()
@@ -197,6 +231,11 @@ async function cancel(element: HTMLInputElement) {
 
 .title {
 	margin-block-end: 0;
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+	color: var(--text-strong);
 }
 
 .title.input {
@@ -209,9 +248,30 @@ async function cancel(element: HTMLInputElement) {
 	}
 }
 
-.title.task-id {
+.task-id-link {
+	display: inline-flex;
+	align-items: center;
+	gap: .3rem;
+	border-radius: var(--radius-sm);
+
+	&:hover .title.task-id,
+	&:focus-visible .title.task-id {
+		color: var(--primary);
+		text-decoration: underline;
+	}
+}
+
+.task-id-link__icon {
+	inline-size: .65rem;
 	color: var(--grey-400);
+}
+
+.title.task-id {
+	color: var(--grey-500);
 	white-space: nowrap;
+	font-size: .85rem;
+	font-weight: 500;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .color-bubble {

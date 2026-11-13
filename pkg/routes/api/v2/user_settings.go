@@ -174,6 +174,17 @@ func userShow(ctx context.Context, _ *struct{}) (*singleBody[userInfoBody], erro
 		return nil, translateDomainError(err)
 	}
 
+	// Webpart: the own profile includes the own email address (upstream blanks it everywhere).
+	// Apps that use Vikunja as their login (Docmost) link accounts by it. Only for real users:
+	// link shares have no email, and other users' emails stay hidden on every other endpoint.
+	if _, isUser := a.(*user.User); isUser && !u.IsBot() {
+		withEmail, err := user.GetUserWithEmail(s, &user.User{ID: u.ID})
+		if err != nil {
+			return nil, translateDomainError(err)
+		}
+		u.Email = withEmail.Email
+	}
+
 	info := &userInfoBody{
 		User:                *u,
 		Settings:            models.NewUserGeneralSettings(u),

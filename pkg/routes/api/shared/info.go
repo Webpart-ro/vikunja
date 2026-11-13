@@ -23,6 +23,7 @@ import (
 	"code.vikunja.io/api/pkg/license"
 	"code.vikunja.io/api/pkg/log"
 	"code.vikunja.io/api/pkg/modules/auth/openid"
+	"code.vikunja.io/api/pkg/modules/github"
 	csvmigrator "code.vikunja.io/api/pkg/modules/migration/csv"
 	microsofttodo "code.vikunja.io/api/pkg/modules/migration/microsoft-todo"
 	"code.vikunja.io/api/pkg/modules/migration/planka"
@@ -46,6 +47,8 @@ type VikunjaInfos struct {
 	TaskAttachmentsEnabled     bool      `json:"task_attachments_enabled" doc:"Whether task attachments are enabled."`
 	EnabledBackgroundProviders []string  `json:"enabled_background_providers" doc:"The project-background providers enabled on this instance (e.g. upload, unsplash)."`
 	TotpEnabled                bool      `json:"totp_enabled" doc:"Whether TOTP two-factor authentication is enabled."`
+	TotpEnforced               bool      `json:"totp_enforced" doc:"Whether local accounts must enable TOTP two-factor authentication before using the API."`
+	GithubEnabled              bool      `json:"github_enabled" doc:"Whether the GitHub integration (branches, pull requests and CI on tasks) is configured."`
 	Legal                      LegalInfo `json:"legal" doc:"Links to the instance's legal documents."`
 	CaldavEnabled              bool      `json:"caldav_enabled" doc:"Whether the CalDAV interface is enabled."`
 	AuthInfo                   AuthInfo  `json:"auth" doc:"The authentication methods enabled on this instance."`
@@ -150,6 +153,8 @@ func BuildInfo() VikunjaInfos {
 		MaxItemsPerPage:        config.ServiceMaxItemsPerPage.GetInt(),
 		TaskAttachmentsEnabled: config.ServiceEnableTaskAttachments.GetBool(),
 		TotpEnabled:            config.ServiceEnableTotp.GetBool(),
+		TotpEnforced:           config.ServiceEnableTotp.GetBool() && config.ServiceEnforceTotp.GetBool(),
+		GithubEnabled:          github.Enabled(),
 		CaldavEnabled:          config.ServiceEnableCaldav.GetBool(),
 		EmailRemindersEnabled:  config.ServiceEnableEmailReminders.GetBool(),
 		UserDeletionEnabled:    config.ServiceEnableUserDeletion.GetBool(),

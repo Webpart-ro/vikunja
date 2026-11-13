@@ -177,22 +177,35 @@
 
 
   // Vikunja specific variables
-  --grey-50: hsl(210, 20%, 98%);
-  --grey-100-hsl: 220, 14.3%, 95.9%;
+  // Webpart: slate neutral ramp
+  --grey-50: hsl(210, 40%, 98%);
+  --grey-100-hsl: 210, 40%, 96.1%;
   --grey-100: hsl(var(--grey-100-hsl));
-  --grey-200: hsl(220, 13%, 91%);
-  --grey-300: hsl(216, 12.2%, 83.9%);
-  --grey-400: hsl(217.9, 10.6%, 64.9%);
-  --grey-500-hsl: 220, 8.9%, 46.1%;
+  --grey-200: hsl(214.3, 31.8%, 91.4%);
+  --grey-300: hsl(212.7, 26.8%, 83.9%);
+  --grey-400: hsl(215, 20.2%, 65.1%);
+  --grey-500-hsl: 215.4, 16.3%, 46.9%;
   --grey-500: hsl(var(--grey-500-hsl));
-  --grey-600: hsl(215, 13.8%, 34.1%);
-  --grey-700: hsl(216.9, 19.1%, 26.7%);
-  --grey-800: hsl(215, 27.9%, 16.9%);
-  --grey-900: hsl(220.9, 39.3%, 11%);
-  --site-background: var(--grey-100);
+  --grey-600: hsl(215.3, 19.3%, 34.5%);
+  --grey-700: hsl(215.3, 25%, 26.7%);
+  --grey-800: hsl(217.2, 32.6%, 17.5%);
+  --grey-900: hsl(222.2, 47.4%, 11.2%);
+  --site-background: var(--grey-50);
+
+  // Webpart shell tokens
+  --rail-background: hsl(222.2, 47.4%, 11.2%);
+  --rail-item-color: hsl(212.7, 26.8%, 83.9%);
+  --rail-item-active-background: hsl(217.2, 32.6%, 17.5%);
+  --surface-sunken: var(--grey-100);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --text: var(--grey-700);
+  --text-strong: var(--grey-900);
+  --text-light: var(--grey-500);
 
   // Muted body text (metadata, counts) darkened from --grey-500 to clear 4.5:1 on both white and --grey-100
-  --text-muted: hsl(220, 8.9%, 42%);
+  --text-muted: hsl(215.3, 19.3%, 38%);
 
   // Overrides of Bulma defaults
   --scheme-main: var(--white);
@@ -247,9 +260,9 @@
   --danger-text: hsla(var(--danger-h), var(--danger-s), var(--danger-text-l), var(--danger-a));
 
   // var(--primary) / $blue is #1973ff
-  --primary-h: 217deg;
-  --primary-s: 98%;
-  --primary-l: 53%;
+  --primary-h: 221.2deg;
+  --primary-s: 83.2%;
+  --primary-l: 53.3%;
   --primary-a: 1;
   --primary-hsl: var(--primary-h), var(--primary-s), var(--primary-l);
   --primary: hsla(var(--primary-h), var(--primary-s), var(--primary-l), var(--primary-a));
@@ -280,24 +293,29 @@
 
   &.dark {
     @media screen {
-      // Light mode colours reversed for dark mode
-      --grey-900-hsl: 210, 20%, 98%;
+      // Light mode colours reversed for dark mode (slate)
+      --grey-900-hsl: 210, 40%, 98%;
       --grey-900: hsl(var(--grey-900-hsl));
-      --grey-800: hsl(220, 14.3%, 95.9%);
-      --grey-700: hsl(220, 13%, 91%);
-      --grey-600: hsl(216, 12.2%, 83.9%);
-      --grey-500-hsl: 217.9, 10.6%, 64.9%;
+      --grey-800: hsl(210, 40%, 96.1%);
+      --grey-700: hsl(214.3, 31.8%, 91.4%);
+      --grey-600: hsl(212.7, 26.8%, 83.9%);
+      --grey-500-hsl: 215, 20.2%, 65.1%;
       --grey-500: hsl(var(--grey-500-hsl));
-      --grey-400: hsl(220, 8.9%, 46.1%);
-      --grey-300: hsl(215, 13.8%, 34.1%);
-      --grey-200: hsl(216.9, 19.1%, 26.7%);
-      --grey-100-hsl: 215, 27.9%, 16.9%;
+      --grey-400: hsl(215.4, 16.3%, 46.9%);
+      --grey-300: hsl(215.3, 19.3%, 34.5%);
+      --grey-200: hsl(215.3, 25%, 26.7%);
+      --grey-100-hsl: 217.2, 32.6%, 17.5%;
       --grey-100: hsl(var(--grey-100-hsl));
-      --grey-50-hsl: 220.9, 39.3%, 11%;
+      --grey-50-hsl: 222.2, 47.4%, 11.2%;
       --grey-50: hsl(var(--grey-50-hsl));
+      --site-background: hsl(222.2, 47.4%, 7%);
+      --surface-sunken: hsl(222.2, 47.4%, 9%);
+      --bucket-border: hsl(217.2, 32.6%, 15%);
+      --rail-background: hsl(222.2, 47.4%, 5%);
+      --rail-item-active-background: hsl(217.2, 32.6%, 17.5%);
 
-      // Dark grey looks better than black
-      --white: var(--grey-50);
+      // Webpart: raised surfaces (cards, panels) sit above the sunken columns
+      --white: hsl(219, 38%, 13.5%);
       --black-l: 100%;
 
       // Text renders better in grey than black
@@ -326,9 +344,9 @@
       --logo-text-color: var(--grey-700);
 
       // Slightly different primary color to make sure it has a sufficient contrast ratio
-      --primary-h: 217deg;
-      --primary-s: 98%;
-      --primary-l: 58%;
+      --primary-h: 217.2deg;
+      --primary-s: 91.2%;
+      --primary-l: 59.8%;
 
       // Muted text is a light grey on dark backgrounds and already passes; keep it
       --text-muted: var(--grey-500);

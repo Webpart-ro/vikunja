@@ -321,6 +321,8 @@ var unauthenticatedAPIPaths = map[string]bool{
 	"/api/v2/docs/scalar.standalone.js": true,
 	"/api/v2/schemas/:schema":           true,
 	"/api/v2/info":                      true,
+	// Webpart: GitHub App webhook, authenticated by its HMAC signature instead of a token
+	"/api/v2/integrations/github/webhook": true,
 
 	"/api/v2/register":                       true,
 	"/api/v2/invite-links/check":             true,
@@ -481,6 +483,8 @@ func registerAPIRoutesV2(e *echo.Echo, a *echo.Group, noAuthRateLimit, refreshRa
 	// Must come after rate limiting: the gate does a per-request admin DB read,
 	// so an unauthenticated flood to /api/v2/admin/* would otherwise be unbounded.
 	a.Use(gateV2AdminRoutes())
+	// Webpart: mandatory 2FA (service.enforcetotp). After rate limiting, like the admin gate, because it reads the DB.
+	a.Use(RequireTOTPEnrollment())
 	if auth := healthBasicAuth(); auth != nil {
 		a.Use(pathScoped(func(p string) bool { return p == "/api/v2/health" }, auth))
 	}
@@ -585,6 +589,9 @@ func registerAPIRoutes(a *echo.Group, noAuthRateLimit, refreshRateLimit echo.Mid
 
 	// Middleware to collect metrics
 	setupMetricsMiddleware(a)
+
+	// Webpart: mandatory 2FA (service.enforcetotp)
+	a.Use(RequireTOTPEnrollment())
 
 	a.GET("/token/test", apiv1.TestToken)
 	a.POST("/token/test", apiv1.CheckToken)

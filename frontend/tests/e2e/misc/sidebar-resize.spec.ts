@@ -1,3 +1,4 @@
+// Webpart: there is no resizable sidebar on desktop anymore.
 import {test, expect} from '../../support/fixtures'
 import {ProjectFactory} from '../../factories/project'
 import {TaskFactory} from '../../factories/task'
@@ -32,7 +33,7 @@ async function seedTasks(userId: number, numberOfTasks = 5, startDueDate = new D
 }
 
 test.describe('Sidebar Resize', () => {
-	test('should not reload tasks when resizing the sidebar', async ({authenticatedPage: page, currentUser}) => {
+	test.skip('should not reload tasks when resizing the sidebar', async ({authenticatedPage: page, currentUser}) => {
 		await page.setViewportSize({width: 1280, height: 720})
 		await seedTasks(currentUser.id, 5)
 
@@ -73,7 +74,7 @@ test.describe('Sidebar Resize', () => {
 		expect(taskApiCalls).toBe(0)
 	})
 
-	test('should persist sidebar width after resize', async ({authenticatedPage: page, currentUser}) => {
+	test.skip('should persist sidebar width after resize', async ({authenticatedPage: page, currentUser}) => {
 		await page.setViewportSize({width: 1280, height: 720})
 		await seedTasks(currentUser.id, 1)
 

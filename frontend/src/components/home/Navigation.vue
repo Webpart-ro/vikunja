@@ -5,7 +5,7 @@
 		:style="{'--sidebar-width': sidebarWidthStyle}"
 	>
 		<nav
-			class="menu top-menu"
+			class="menu top-menu is-hidden-tablet"
 			:aria-label="$t('navigation.main')"
 		>
 			<RouterLink
@@ -194,9 +194,10 @@ const savedFilterProjects = computed(() => projectList.savedFilterProjects)
 
 	display: flex;
 	flex-direction: column;
-	background: var(--site-background);
+	background: var(--white);
+	border-inline-end: 1px solid var(--grey-200);
 	color: $vikunja-nav-color;
-	padding: 1rem 0;
+	padding: 1rem .5rem;
 	transition: transform $transition-duration ease-in;
 	position: fixed;
 	inset-block-start: $navbar-height;
@@ -205,6 +206,11 @@ const savedFilterProjects = computed(() => projectList.savedFilterProjects)
 	transform: translateX(-100%);
 	inline-size: var(--sidebar-width);
 	overflow-y: auto;
+
+	// Webpart: the sidebar is a mobile-only drawer; desktop uses the icon rail + header project switcher
+	@media screen and (min-width: $tablet) {
+		display: none;
+	}
 
 	[dir="rtl"] & {
 		transform: translateX(100%);
@@ -251,7 +257,7 @@ const savedFilterProjects = computed(() => projectList.savedFilterProjects)
 
 	.list-menu-link,
 	li > a {
-		padding-inline-start: 2rem;
+		padding-inline-start: 1rem;
 		display: inline-block;
 
 		.icon {

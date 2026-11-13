@@ -60,7 +60,7 @@ test.describe('Filter Autocomplete', () => {
 			await page.goto('/filters/new')
 
 			// Wait for projects to be loaded
-			await expect(page.getByRole('link', {name: 'Inbox', exact: true})).toBeVisible({timeout: 10000})
+			await page.waitForLoadState('networkidle')
 
 			// Fill in filter name
 			await page.locator('input#Title').fill('Inbox Filter')
@@ -89,7 +89,7 @@ test.describe('Filter Autocomplete', () => {
 			await page.goto('/filters/new')
 
 			// Wait for projects to be loaded
-			await expect(page.locator('.menu-list a').filter({hasText: 'Work To Do'})).toBeVisible({timeout: 10000})
+			await page.waitForLoadState('networkidle')
 
 			// Fill in filter name
 			await page.locator('input#Title').fill('Work Filter')
@@ -121,7 +121,7 @@ test.describe('Filter Autocomplete', () => {
 			await page.goto('/filters/new')
 
 			// Wait for projects to be loaded
-			await expect(page.getByRole('link', {name: 'Inbox', exact: true})).toBeVisible({timeout: 10000})
+			await page.waitForLoadState('networkidle')
 
 			await page.locator('input#Title').fill('Complex Filter')
 
@@ -156,7 +156,7 @@ test.describe('Filter Autocomplete', () => {
 			await page.goto('/filters/new')
 
 			// Wait for projects to be loaded
-			await expect(page.locator('.menu-list a').filter({hasText: 'Work To Do'})).toBeVisible({timeout: 10000})
+			await page.waitForLoadState('networkidle')
 
 			// Step 1: Create a filter with multi-value project using 'in' operator
 			await page.locator('input#Title').fill('Work Filter')
@@ -196,18 +196,9 @@ test.describe('Filter Autocomplete', () => {
 			// Wait for navigation to the saved filter view
 			await expect(page).toHaveURL(/\/projects\/-\d+/, {timeout: 5000})
 
-			// Step 3: Open the filter settings menu from sidebar and click Edit
-			// Find the Work Filter link in the sidebar and click its settings menu
-			const filterLink = page.locator('.menu-list').getByRole('link', {name: 'Work Filter', exact: true})
-			await expect(filterLink).toBeVisible()
-
-			// Hover over the filter to show the settings menu button
-			const filterItem = filterLink.locator('..')
-			await filterItem.hover()
-
-			// Click the settings menu button
-			const settingsButton = filterItem.getByRole('button', {name: 'Open project settings menu'})
-			await settingsButton.click()
+			// Step 3: Open the filter's settings menu next to its title in the header and click Edit
+			await expect(page.locator('.project-title')).toContainText('Work Filter')
+			await page.locator('.navbar').getByRole('button', {name: 'Open project settings menu'}).click()
 
 			// Click "Edit" link in the dropdown menu
 			await page.getByRole('link', {name: 'Edit', exact: true}).click()
@@ -240,13 +231,10 @@ test.describe('Filter Autocomplete', () => {
 
 			// Step 7: Reload and re-open edit to verify the filter text is still intact
 			await page.reload()
-			await expect(page.locator('.menu-list').getByRole('link', {name: 'Work Filter', exact: true})).toBeVisible({timeout: 5000})
+			await expect(page.locator('.project-title')).toContainText('Work Filter', {timeout: 5000})
 
 			// Re-open the edit modal
-			const filterLinkAfterReload = page.locator('.menu-list').getByRole('link', {name: 'Work Filter', exact: true})
-			const filterItemAfterReload = filterLinkAfterReload.locator('..')
-			await filterItemAfterReload.hover()
-			await filterItemAfterReload.getByRole('button', {name: 'Open project settings menu'}).click()
+			await page.locator('.navbar').getByRole('button', {name: 'Open project settings menu'}).click()
 			await page.getByRole('link', {name: 'Edit', exact: true}).click()
 
 			// Verify the filter title and content are intact

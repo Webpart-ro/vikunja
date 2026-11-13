@@ -1,6 +1,52 @@
 <template>
-	<template v-if="kanbanView">
-		<span class="has-text-grey-light"> &gt; </span>
+	<!-- Webpart: prominent status pill (Jira-style) for the task sidebar -->
+	<div
+		v-if="variant === 'status'"
+		class="status-select"
+	>
+		<Dropdown v-if="kanbanView && canWrite">
+			<template #trigger="{toggleOpen, open}">
+				<BaseButton
+					class="status-pill"
+					:class="statusClass"
+					:aria-expanded="open"
+					:aria-label="$t('task.detail.bucketSelectLabel', {bucket: statusTitle})"
+					@click="toggleOpen"
+				>
+					<span>{{ statusTitle }}</span>
+					<Icon
+						icon="chevron-down"
+						class="status-pill__chevron"
+					/>
+				</BaseButton>
+			</template>
+			<template #default="{close}">
+				<div
+					class="status-menu"
+					@click="close"
+				>
+					<DropdownItem
+						v-for="bucket in buckets"
+						:key="bucket.id"
+						:class="{'is-active': currentBucket?.id === bucket.id}"
+						@click="changeBucket(bucket)"
+					>
+						{{ bucket.title }}
+					</DropdownItem>
+				</div>
+			</template>
+		</Dropdown>
+		<span
+			v-else
+			class="status-pill is-static"
+			:class="statusClass"
+		>{{ statusTitle }}</span>
+	</div>
+	<template v-else-if="kanbanView">
+		<span
+			class="breadcrumb-separator"
+			aria-hidden="true"
+		>/</span>
 		<template v-if="canWrite">
 			<Dropdown>
 				<template #trigger="{toggleOpen, open}">
@@ -62,10 +108,13 @@ import DropdownItem from '@/components/misc/DropdownItem.vue'
 
 import {success} from '@/message'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
 	task: ITask
 	canWrite: boolean
-}>()
+	variant?: 'breadcrumb' | 'status'
+}>(), {
+	variant: 'breadcrumb',
+})
 
 
 const {t} = useI18n({useScope: 'global'})
@@ -114,6 +163,19 @@ const currentBucketTitle = computed(() => {
 	return currentBucket.value?.title || t('task.detail.noBucket')
 })
 
+// Status pill: the kanban column, or plain Open/Done when the project has no manual board.
+const statusTitle = computed(() => {
+	if (kanbanView.value && currentBucket.value?.title) return currentBucket.value.title
+	return props.task.done ? t('task.attributes.done') : t('webpart.list.open')
+})
+
+const statusClass = computed(() => {
+	const doneBucketId = kanbanView.value?.done_bucket_id
+	if (props.task.done || (doneBucketId && currentBucket.value?.id === doneBucketId)) return 'is-done'
+	if (!currentBucket.value || currentBucket.value.id === buckets.value[0]?.id) return 'is-todo'
+	return 'is-progress'
+})
+
 async function changeBucket(bucket: IBucket) {
 	if (!kanbanView.value || currentBucket.value?.id === bucket.id) {
 		return
@@ -131,6 +193,11 @@ async function changeBucket(bucket: IBucket) {
 </script>
 
 <style lang="scss" scoped>
+.breadcrumb-separator {
+	color: var(--grey-300);
+	margin-inline: .1rem;
+}
+
 .bucket-name {
 	color: var(--grey-800);
 
@@ -152,5 +219,57 @@ async function changeBucket(bucket: IBucket) {
 :deep(.dropdown-trigger) {
 	display: inline;
 	padding: 0;
+}
+
+.status-select {
+	display: flex;
+
+	:deep(.dropdown) {
+		display: inline-flex;
+	}
+}
+
+.status-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: .5rem;
+	min-block-size: 2.25rem;
+	padding: .35rem .85rem;
+	border-radius: var(--radius-md);
+	border: 1px solid transparent;
+	font-size: .9rem;
+	font-weight: 600;
+	transition: filter $transition;
+
+	&:not(.is-static):hover,
+	&:not(.is-static):focus-visible {
+		filter: brightness(.96);
+	}
+
+	&.is-todo {
+		background: var(--grey-100);
+		border-color: var(--grey-300);
+		color: var(--grey-800);
+	}
+
+	&.is-progress {
+		background: hsla(var(--primary-h), var(--primary-s), 55%, .14);
+		border-color: hsla(var(--primary-h), var(--primary-s), 50%, .35);
+		color: hsl(var(--primary-h), 70%, 38%);
+	}
+
+	&.is-done {
+		background: hsla(var(--success-h), 60%, 40%, .14);
+		border-color: hsla(var(--success-h), 60%, 35%, .35);
+		color: var(--success-text);
+	}
+}
+
+.status-pill__chevron {
+	inline-size: .7rem;
+}
+
+.status-menu {
+	position: relative; // above Dropdown's hover-bridge ::before
 }
 </style>
