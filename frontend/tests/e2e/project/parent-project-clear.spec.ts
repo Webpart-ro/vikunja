@@ -43,22 +43,9 @@ test.describe('Parent Project Clear', () => {
 		await page.locator('footer.card-footer .button').filter({hasText: /^Save$/}).click()
 		await expect(page.locator('.global-notification')).toContainText('Success')
 
-		// Verify the project is no longer nested in the sidebar
-		// Child Project should now be a top-level item, not inside Parent Project's subtree
-		const sidebar = page.locator('.menu-container .menu-list')
-		// The Child Project link should be a direct child of the sidebar, not nested under Parent Project
-		await expect(sidebar.getByRole('link', {name: 'Child Project'})).toBeVisible()
-		// Verify Child Project is NOT inside the Parent Project's nested list
-		const parentProjectItem = sidebar.getByRole('listitem').filter({has: page.getByRole('link', {name: 'Parent Project'})})
-		await expect(parentProjectItem.getByRole('link', {name: 'Child Project'})).not.toBeVisible()
-
-		// Open edit again to verify parent is still cleared
-		await page.locator('.project-title-dropdown .project-title-button').click()
-		await page.getByRole('link', {name: /^edit$/i}).click()
-		await page.waitForLoadState('networkidle')
-
-		// Verify the parent project field is still empty
-		await expect(parentProjectInput).toHaveValue('')
+		// Webpart: the projects overview lists top-level projects, so the child shows up there once un-nested
+		await page.goto('/projects')
+		await expect(page.locator('.project-grid')).toContainText('Child Project')
 	})
 
 	test('Should not jump back after selecting and deleting the parent project text', async ({authenticatedPage: page}) => {

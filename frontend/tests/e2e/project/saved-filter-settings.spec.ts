@@ -35,9 +35,7 @@ test.describe('Saved Filter Settings', () => {
 		await updatePromise
 
 		await expect(page.locator('.project-title')).toContainText('Renamed Filter')
-		const sidebar = page.locator('.list-menu .navigation-item')
-		await expect(sidebar.filter({hasText: 'Renamed Filter'})).toBeVisible()
-		await expect(sidebar.filter({hasText: 'My Test Filter'})).toHaveCount(0)
+		await expect(page.locator('.project-title')).not.toContainText('My Test Filter')
 	})
 
 	test('Can delete a saved filter', async ({authenticatedPage: page}) => {

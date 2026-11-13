@@ -85,7 +85,8 @@ test.describe('Task Bucket Select', () => {
 		await page.locator('.tasks .task').filter({hasText: tasks[0].title}).click()
 		await expect(page).toHaveURL(new RegExp(`/tasks/${tasks[0].id}`))
 
-		await expect(page.locator('.task-view .status-pill')).not.toBeVisible()
+		// Webpart: without a kanban view the status shows Open/Done, but not as a bucket dropdown
+		await expect(page.locator('.task-view button.status-pill')).toHaveCount(0)
 	})
 
 	test.describe('Multiple kanban views', () => {
@@ -149,7 +150,8 @@ test.describe('Task Bucket Select', () => {
 			await page.locator('.tasks .task').filter({hasText: task.title}).click()
 			await expect(page).toHaveURL(new RegExp(`/tasks/${task.id}`))
 
-			await expect(page.locator('.task-view .status-pill')).not.toBeVisible()
+			// Webpart: without a kanban view the status shows Open/Done, but not as a bucket dropdown
+		await expect(page.locator('.task-view button.status-pill')).toHaveCount(0)
 		})
 
 		test('Shows the correct buckets when opening a task from the first kanban view', async ({authenticatedPage: page}) => {
@@ -202,7 +204,8 @@ test.describe('Task Bucket Select', () => {
 		await expect(dropdownMenu).toBeHidden()
 	})
 
-	test('Renders the bucket dropdown above the remove assignee buttons', async ({authenticatedPage: page}) => {
+	// Webpart: the status dropdown sits above the Details card in the sidebar and no longer overlaps the assignee buttons
+	test.skip('Renders the bucket dropdown above the remove assignee buttons', async ({authenticatedPage: page}) => {
 		const {project, view, task} = await createKanbanTaskInBucket()
 		// The dropdown is right-aligned to the bucket name in the breadcrumb, so it
 		// only reaches over the assignee avatars once the row is long enough.

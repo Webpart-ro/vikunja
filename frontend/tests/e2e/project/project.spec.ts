@@ -72,7 +72,6 @@ test.describe('Projects', () => {
 		await expect(page.locator('.global-notification')).toContainText('Success')
 		await expect(page.locator('.project-title')).toContainText(newProjectName)
 		await expect(page.locator('.project-title')).not.toContainText(projects[0].title)
-		await expect(page.locator('.menu-container .menu-list').getByRole('listitem').filter({hasText: newProjectName})).toBeVisible()
 		await page.goto('/')
 		await expect(page.locator('.project-grid')).toContainText(newProjectName)
 		await expect(page.locator('.project-grid')).not.toContainText(projects[0].title)

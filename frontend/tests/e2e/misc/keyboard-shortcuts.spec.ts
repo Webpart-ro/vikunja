@@ -63,9 +63,8 @@ test.describe('Keyboard layouts', () => {
 		await page.goto('/projects/1/1')
 		const row = page.locator('.tasks .single-task').first()
 		await expect(row).toBeVisible()
-		await page.locator('.project-title').click()
-		// Webpart: the title is the project switcher; close its menu so the shortcut reaches the list
-		await page.keyboard.press('Escape')
+		// Webpart: click a neutral spot (the title is now the project switcher dropdown)
+		await page.locator('.list-columns-header').click()
 		await pressLayoutKey(page, {
 			key: 'j',
 			code: 'KeyC',
