@@ -107,7 +107,7 @@ func RequireTOTPEnrollment() echo.MiddlewareFunc {
 				log.Errorf("TOTP gate: could not load user %d: %s", u.ID, err)
 				return echo.ErrInternalServerError
 			}
-			if fresh.Issuer != user.IssuerLocal || fresh.IsBot() {
+			if fresh.Issuer != user.IssuerLocal || fresh.IsBot() || isExemptAPITokenRequest(c, fresh.Username) {
 				_ = s.Close()
 				return next(c)
 			}
@@ -123,4 +123,20 @@ func RequireTOTPEnrollment() echo.MiddlewareFunc {
 			return next(c)
 		}
 	}
+}
+
+// isExemptAPITokenRequest: service accounts listed in service.enforcetotpexemptusers keep
+// API-token access (CI automation can't type TOTP codes). Their browser sessions are not exempt.
+func isExemptAPITokenRequest(c *echo.Context, username string) bool {
+	if c.Get("api_token") == nil {
+		return false
+	}
+	for _, entry := range config.ServiceEnforceTotpExemptUsers.GetStringSlice() {
+		for _, name := range strings.Split(entry, ",") {
+			if name = strings.TrimSpace(name); name != "" && strings.EqualFold(name, username) {
+				return true
+			}
+		}
+	}
+	return false
 }

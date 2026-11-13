@@ -65,6 +65,7 @@ const (
 	ServiceEnableTaskComments             Key = `service.enabletaskcomments`
 	ServiceEnableTotp                     Key = `service.enabletotp`
 	ServiceEnforceTotp                    Key = `service.enforcetotp`
+	ServiceEnforceTotpExemptUsers         Key = `service.enforcetotpexemptusers`
 	ServiceOAuthTrustedRedirectURIs       Key = `service.oauthtrustedredirecturis`
 	ServiceTestingtoken                   Key = `service.testingtoken`
 	ServiceEnableEmailReminders           Key = `service.enableemailreminders`
@@ -411,6 +412,7 @@ func initDefaultConfig() {
 	ServiceEnableTaskComments.setDefault(true)
 	ServiceEnableTotp.setDefault(true)
 	ServiceEnforceTotp.setDefault(false)
+	ServiceEnforceTotpExemptUsers.setDefault([]string{})
 	ServiceOAuthTrustedRedirectURIs.setDefault([]string{})
 	ServiceEnableEmailReminders.setDefault(true)
 	ServiceEnableUserDeletion.setDefault(true)

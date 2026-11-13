@@ -104,6 +104,11 @@
                     "comment": "Extra https redirect URIs the built-in OAuth 2.0 server may send authorization codes to, besides native-app schemes and loopback addresses. Each entry must match the requested redirect_uri exactly. Lets a trusted web app (e.g. a self-hosted wiki) use Vikunja accounts for login. As an environment variable, separate entries with commas."
                 },
                 {
+                    "key": "enforcetotpexemptusers",
+                    "default_value": "[]",
+                    "comment": "Usernames of service accounts (e.g. a CI bot) whose API tokens keep working while enforcetotp is on. Only requests authenticated with an API token are exempt; logging in as these users in a browser still requires TOTP. As an environment variable, separate usernames with commas."
+                },
+                {
                     "key": "enforcetotp",
                     "default_value": "false",
                     "comment": "If enabled, every local account must turn on TOTP two-factor authentication. Until they do, the API only allows the requests needed to set it up (reading the own user, the TOTP settings, token refresh and logout). Accounts from OpenID providers are exempt; enforce 2FA at the provider instead. Requires `enabletotp`."

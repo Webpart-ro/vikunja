@@ -89,6 +89,25 @@ func TestTOTPEnforcementGate(t *testing.T) {
 		assert.Contains(t, rec.Body.String(), `"code":1091`)
 	})
 
+	t.Run("enforced: exempt service account keeps API-token access only", func(t *testing.T) {
+		const user1Token = "tk_2eef46f40ebab3304919ab2e7e39993f75f29d2e" // api_tokens.yml #1, owner user1, tasks read_all
+		e, err := setupTestEnv()
+		require.NoError(t, err)
+		enforce(t)
+
+		rec := humaRequest(t, e, http.MethodGet, "/api/v2/tasks", "", user1Token, "")
+		require.Equal(t, http.StatusForbidden, rec.Code, "not exempt yet: %s", rec.Body.String())
+
+		config.ServiceEnforceTotpExemptUsers.Set([]string{"someone-else, user1"})
+		t.Cleanup(func() { config.ServiceEnforceTotpExemptUsers.Set([]string{}) })
+
+		rec = humaRequest(t, e, http.MethodGet, "/api/v2/tasks", "", user1Token, "")
+		require.Equal(t, http.StatusOK, rec.Code, "API token of an exempt account: %s", rec.Body.String())
+
+		rec = humaRequest(t, e, http.MethodGet, "/api/v2/tasks", "", humaTokenFor(t, &testuser1), "")
+		require.Equal(t, http.StatusForbidden, rec.Code, "a browser session of the same account is still gated")
+	})
+
 	t.Run("enforced: /info reports it, unauthenticated", func(t *testing.T) {
 		e, err := setupTestEnv() // resets config to defaults, so enforce afterwards
 		require.NoError(t, err)
