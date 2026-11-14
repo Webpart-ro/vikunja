@@ -33,12 +33,12 @@ const loading = ref(true)
 const errorMessage = ref('')
 const redirectedToApp = ref(false)
 
+// PKCE (code_challenge, code_challenge_method) is checked by the API: required for public
+// clients, optional for confidential ones that authenticate with a client secret.
 const requiredParams = [
 	'response_type',
 	'client_id',
 	'redirect_uri',
-	'code_challenge',
-	'code_challenge_method',
 ] as const
 
 const q = (v: unknown) => typeof v === 'string' ? v : undefined

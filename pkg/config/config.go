@@ -67,6 +67,7 @@ const (
 	ServiceEnforceTotp                    Key = `service.enforcetotp`
 	ServiceEnforceTotpExemptUsers         Key = `service.enforcetotpexemptusers`
 	ServiceOAuthTrustedRedirectURIs       Key = `service.oauthtrustedredirecturis`
+	ServiceOAuthConfidentialClients       Key = `service.oauthconfidentialclients`
 	ServiceTestingtoken                   Key = `service.testingtoken`
 	ServiceEnableEmailReminders           Key = `service.enableemailreminders`
 	ServiceEnableUserDeletion             Key = `service.enableuserdeletion`
@@ -421,6 +422,7 @@ func initDefaultConfig() {
 	ServiceEnforceTotp.setDefault(false)
 	ServiceEnforceTotpExemptUsers.setDefault([]string{})
 	ServiceOAuthTrustedRedirectURIs.setDefault([]string{})
+	ServiceOAuthConfidentialClients.setDefault([]string{})
 	ServiceEnableEmailReminders.setDefault(true)
 	ServiceEnableUserDeletion.setDefault(true)
 	ServiceMaxAvatarSize.setDefault(1024)
