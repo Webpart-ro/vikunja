@@ -465,6 +465,12 @@ const router = createRouter({
 			component: () => import('@/views/user/OAuthAuthorize.vue'),
 		},
 		{
+			// Webpart staging single sign-on: staging websites send logged-out browsers here.
+			path: '/staging-login',
+			name: 'staging.login',
+			component: () => import('@/views/user/StagingLogin.vue'),
+		},
+		{
 			path: '/about',
 			name: 'about',
 			component: () => import('@/views/About.vue'),

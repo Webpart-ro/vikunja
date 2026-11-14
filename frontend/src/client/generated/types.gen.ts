@@ -2397,6 +2397,32 @@ export type ShareCounts = {
     readonly user_shares?: number;
 };
 
+export type StagingSessionInputBody = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * The staging URL to return to; must be https on the configured cookie domain.
+     */
+    redirect?: string;
+};
+
+export type StagingSessionOutputBody = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * When the staging session ends.
+     */
+    expires_at?: string;
+    /**
+     * The validated URL to send the browser to.
+     */
+    redirect?: string;
+};
+
 export type Status = {
     /**
      * A URL to the JSON Schema for this object.
@@ -5384,6 +5410,24 @@ export type SavedFilterReadBodyWritable = {
      * The title of the filter.
      */
     title?: string;
+};
+
+export type StagingSessionInputBodyWritable = {
+    /**
+     * The staging URL to return to; must be https on the configured cookie domain.
+     */
+    redirect?: string;
+};
+
+export type StagingSessionOutputBodyWritable = {
+    /**
+     * When the staging session ends.
+     */
+    expires_at?: string;
+    /**
+     * The validated URL to send the browser to.
+     */
+    redirect?: string;
 };
 
 export type TaskWritable = {
@@ -10092,6 +10136,82 @@ export type AuthLinkShareResponses = {
 };
 
 export type AuthLinkShareResponse = AuthLinkShareResponses[keyof AuthLinkShareResponses];
+
+export type StagingAuthSessionData = {
+    body: StagingSessionInputBodyWritable;
+    path?: never;
+    query?: never;
+    url: '/staging-auth/session';
+};
+
+export type StagingAuthSessionErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type StagingAuthSessionError = StagingAuthSessionErrors[keyof StagingAuthSessionErrors];
+
+export type StagingAuthSessionResponses = {
+    /**
+     * OK
+     */
+    200: StagingSessionOutputBody;
+};
+
+export type StagingAuthSessionResponse = StagingAuthSessionResponses[keyof StagingAuthSessionResponses];
+
+export type StagingAuthVerifyData = {
+    body?: never;
+    headers?: {
+        /**
+         * Set by the proxy: the host of the original request.
+         */
+        'X-Forwarded-Host'?: string;
+        /**
+         * Set by the proxy: the scheme of the original request.
+         */
+        'X-Forwarded-Proto'?: string;
+        /**
+         * Set by the proxy: path and query of the original request.
+         */
+        'X-Forwarded-Uri'?: string;
+        /**
+         * Set by the proxy: the method of the original request.
+         */
+        'X-Forwarded-Method'?: string;
+        /**
+         * The original request's Accept header; only page loads (text/html) are redirected to the login page.
+         */
+        Accept?: string;
+        /**
+         * Optional HTTP Basic credentials for automation.
+         */
+        Authorization?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/staging-auth/verify';
+};
+
+export type StagingAuthVerifyErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type StagingAuthVerifyError = StagingAuthVerifyErrors[keyof StagingAuthVerifyErrors];
+
+export type StagingAuthVerifyResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type StagingAuthVerifyResponse = StagingAuthVerifyResponses[keyof StagingAuthVerifyResponses];
 
 export type SubscriptionsDeleteData = {
     body?: never;

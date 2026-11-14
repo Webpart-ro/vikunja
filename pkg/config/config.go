@@ -239,13 +239,20 @@ const (
 	WebhooksEnabled Key = `webhooks.enabled`
 
 	// Webpart GitHub integration
-	GithubEnabled               Key = `github.enabled`
-	GithubAppID                 Key = `github.appid`
-	GithubPrivateKeyPath        Key = `github.privatekeypath`
-	GithubWebhookSecret         Key = `github.webhooksecret` //nolint:gosec // config key name, not a credential
-	GithubBotUsername           Key = `github.botusername`
-	GithubAPIURL                Key = `github.apiurl`
-	GithubDefaultBase           Key = `github.defaultbasebranch`
+	GithubEnabled        Key = `github.enabled`
+	GithubAppID          Key = `github.appid`
+	GithubPrivateKeyPath Key = `github.privatekeypath`
+	GithubWebhookSecret  Key = `github.webhooksecret` //nolint:gosec // config key name, not a credential
+	GithubBotUsername    Key = `github.botusername`
+	GithubAPIURL         Key = `github.apiurl`
+	GithubDefaultBase    Key = `github.defaultbasebranch`
+
+	// Webpart staging single sign-on (Traefik forwardAuth)
+	StagingAuthEnabled        Key = `stagingauth.enabled`
+	StagingAuthCookieDomain   Key = `stagingauth.cookiedomain`
+	StagingAuthSessionDays    Key = `stagingauth.sessiondays`
+	StagingAuthBasicAuthUsers Key = `stagingauth.basicauthusers`
+
 	WebhooksTimeoutSeconds      Key = `webhooks.timeoutseconds`
 	WebhooksProxyURL            Key = `webhooks.proxyurl`
 	WebhooksProxyPassword       Key = `webhooks.proxypassword`
@@ -555,6 +562,10 @@ func initDefaultConfig() {
 	GithubBotUsername.setDefault("")
 	GithubAPIURL.setDefault("https://api.github.com")
 	GithubDefaultBase.setDefault("develop")
+	StagingAuthEnabled.setDefault(false)
+	StagingAuthCookieDomain.setDefault("")
+	StagingAuthSessionDays.setDefault(14)
+	StagingAuthBasicAuthUsers.setDefault([]string{})
 	WebhooksTimeoutSeconds.setDefault(30)
 	WebhooksAllowNonRoutableIPs.setDefault(false)
 	// Audit
