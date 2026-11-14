@@ -242,6 +242,8 @@ func RegisterRoutes(e *echo.Echo) {
 	f.GET("/notifications.atom", feeds.NotificationsAtomFeed)
 
 	e.GET("/.well-known/change-password", ChangePasswordRedirect)
+	// Webpart: OpenID Connect discovery for apps that log in through Vikunja (Appwrite)
+	e.GET("/.well-known/openid-configuration", OpenIDConfiguration)
 
 	// healthcheck
 	var healthMiddleware []echo.MiddlewareFunc
