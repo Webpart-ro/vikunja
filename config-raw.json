@@ -1082,6 +1082,32 @@
             ]
         },
         {
+            "key": "stagingauth",
+            "comment": "Webpart staging single sign-on: a reverse proxy (Traefik forwardAuth) calls /api/v2/staging-auth/verify for every request to a protected site. Browsers pass with a session cookie set on the cookie domain after logging in here (mandatory 2FA applies); automation passes with HTTP Basic credentials.",
+            "children": [
+                {
+                    "key": "enabled",
+                    "default_value": "false",
+                    "comment": "Whether staging single sign-on is enabled."
+                },
+                {
+                    "key": "cookiedomain",
+                    "default_value": "",
+                    "comment": "The domain the session cookie is shared on, e.g. webpart.ro. Vikunja must run on this domain or a subdomain of it, and only redirect targets on it are accepted."
+                },
+                {
+                    "key": "sessiondays",
+                    "default_value": "14",
+                    "comment": "How many days a staging session lasts before the browser has to pass through Vikunja again."
+                },
+                {
+                    "key": "basicauthusers",
+                    "default_value": "[]",
+                    "comment": "htpasswd lines (user:bcrypt-hash) accepted as HTTP Basic credentials, for CI health checks and end-to-end tests."
+                }
+            ]
+        },
+        {
             "key": "github",
             "comment": "Webpart GitHub integration: shows branches, pull requests and CI runs that mention a task's identifier (e.g. HS-334) on the task, lets users create branches from a task, and comments on tasks when GitHub reports a staging or production deployment. Needs a GitHub App installed on the organization.",
             "children": [

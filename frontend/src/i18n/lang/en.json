@@ -1968,6 +1968,11 @@
     "totp": {
       "required": "Two-factor authentication is required for all accounts. Set it up below to continue using Webpart Tasks.",
       "cannotDisable": "Two-factor authentication is required on this instance and can't be turned off."
+    },
+    "staging": {
+      "title": "Staging sign-in",
+      "opening": "Signing you in to {host}…",
+      "missingTarget": "This link is missing the staging page to return to. Open the staging site again."
     }
   }
 }

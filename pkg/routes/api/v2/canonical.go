@@ -37,7 +37,9 @@ func NewCanonicalAPI() (huma.API, error) {
 	config.ServiceEnableTaskAttachments.Set(true)
 	config.ServiceEnableTaskComments.Set(true)
 	config.WebhooksEnabled.Set(true)
-	config.GithubEnabled.Set(true) // Webpart GitHub integration
+	config.GithubEnabled.Set(true)      // Webpart GitHub integration
+	config.StagingAuthEnabled.Set(true) // Webpart staging single sign-on
+	config.StagingAuthCookieDomain.Set("example.com")
 	config.BackgroundsEnabled.Set(true)
 	config.BackgroundsUploadEnabled.Set(true)
 	config.BackgroundsUnsplashEnabled.Set(true)
