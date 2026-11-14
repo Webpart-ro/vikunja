@@ -49,6 +49,9 @@ type TokenRequest struct {
 	ClientID     string `json:"client_id" form:"client_id"`
 	RedirectURI  string `json:"redirect_uri" form:"redirect_uri"`
 	CodeVerifier string `json:"code_verifier" form:"code_verifier"`
+	ClientSecret string `json:"client_secret,omitempty" form:"client_secret"`
+	// Scope is accepted and ignored: OpenID Connect clients send it on the code exchange.
+	Scope        string `json:"scope,omitempty" form:"scope"`
 	RefreshToken string `json:"refresh_token" form:"refresh_token"`
 }
 
@@ -133,8 +136,12 @@ func exchangeAuthorizationCode(ctx context.Context, req *TokenRequest, deviceInf
 		return nil, &models.ErrOAuthInvalidRedirectURI{}
 	}
 
-	// Verify PKCE
-	if !VerifyPKCE(req.CodeVerifier, oauthCode.CodeChallenge, oauthCode.CodeChallengeMethod) {
+	// Verify PKCE, or the client secret for codes issued to a confidential client without it.
+	if oauthCode.CodeChallenge == "" {
+		if !ValidClientSecret(oauthCode.ClientID, req.ClientSecret) {
+			return nil, &models.ErrOAuthClientNotFound{}
+		}
+	} else if !VerifyPKCE(req.CodeVerifier, oauthCode.CodeChallenge, oauthCode.CodeChallengeMethod) {
 		return nil, &models.ErrOAuthPKCEVerifyFailed{}
 	}
 

@@ -263,6 +263,7 @@ func CollectRoutesForAPITokenUsage(route echo.RouteInfo, requiresJWT bool) {
 		routeGroupName == "tokens" ||
 		routeGroupName == "*" ||
 		routeGroupName == "oauth_authorize" ||
+		routeGroupName == "oauth_userinfo" || // Webpart: OIDC userinfo, user sessions only
 		routeGroupName == "mcp" ||
 		strings.HasPrefix(routeGroupName, "mcp_") ||
 		strings.HasPrefix(routeGroupName, "user_") {

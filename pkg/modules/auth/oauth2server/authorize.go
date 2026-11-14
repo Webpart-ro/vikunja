@@ -96,8 +96,11 @@ func Authorize(req *AuthorizeRequest, userID int64) (*AuthorizeResponse, error) 
 		return nil, &models.ErrOAuthInvalidRedirectURI{}
 	}
 
-	// Validate PKCE (required)
-	if req.CodeChallenge == "" || req.CodeChallengeMethod != "S256" {
+	// Validate PKCE: required, except for confidential clients, which prove themselves
+	// with their client_secret at the token endpoint instead.
+	confidentialWithoutPKCE := req.CodeChallenge == "" && req.CodeChallengeMethod == "" && IsConfidentialClient(req.ClientID)
+	validPKCE := req.CodeChallenge != "" && req.CodeChallengeMethod == "S256"
+	if !confidentialWithoutPKCE && !validPKCE {
 		return nil, &models.ErrOAuthMissingPKCE{}
 	}
 

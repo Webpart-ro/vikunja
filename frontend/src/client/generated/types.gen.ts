@@ -1321,6 +1321,33 @@ export type MigrationStartedBodyBody = {
     readonly message?: string;
 };
 
+export type OauthUserinfoBodyBody = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * The user's email address.
+     */
+    email?: string;
+    /**
+     * Whether the account is active, i.e. its email address was confirmed.
+     */
+    email_verified?: boolean;
+    /**
+     * The display name, or the username when none is set.
+     */
+    name?: string;
+    /**
+     * The username.
+     */
+    preferred_username?: string;
+    /**
+     * The user's id, as a string.
+     */
+    sub?: string;
+};
+
 export type OpenIdAuthInfo = {
     enabled?: boolean;
     providers?: Array<Provider> | null;
@@ -3389,11 +3416,13 @@ export type TokenRequest = {
      */
     readonly $schema?: string;
     client_id?: string;
+    client_secret?: string;
     code?: string;
     code_verifier?: string;
     grant_type?: string;
     redirect_uri?: string;
     refresh_token?: string;
+    scope?: string;
 };
 
 export type TokenResponse = {
@@ -4883,6 +4912,29 @@ export type MigrationMigrateBodyWritable = {
     state?: string;
 };
 
+export type OauthUserinfoBodyBodyWritable = {
+    /**
+     * The user's email address.
+     */
+    email?: string;
+    /**
+     * Whether the account is active, i.e. its email address was confirmed.
+     */
+    email_verified?: boolean;
+    /**
+     * The display name, or the username when none is set.
+     */
+    name?: string;
+    /**
+     * The username.
+     */
+    preferred_username?: string;
+    /**
+     * The user's id, as a string.
+     */
+    sub?: string;
+};
+
 export type OverviewWritable = {
     [key: string]: never;
 };
@@ -5725,11 +5777,13 @@ export type TimeEntryReadBodyWritable = {
 
 export type TokenRequestWritable = {
     client_id?: string;
+    client_secret?: string;
     code?: string;
     code_verifier?: string;
     grant_type?: string;
     redirect_uri?: string;
     refresh_token?: string;
+    scope?: string;
 };
 
 export type TokenResponseWritable = {
@@ -8135,6 +8189,31 @@ export type OauthTokenResponses = {
 };
 
 export type OauthTokenResponse = OauthTokenResponses[keyof OauthTokenResponses];
+
+export type OauthUserinfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/oauth/userinfo';
+};
+
+export type OauthUserinfoErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type OauthUserinfoError = OauthUserinfoErrors[keyof OauthUserinfoErrors];
+
+export type OauthUserinfoResponses = {
+    /**
+     * OK
+     */
+    200: OauthUserinfoBodyBody;
+};
+
+export type OauthUserinfoResponse = OauthUserinfoResponses[keyof OauthUserinfoResponses];
 
 export type ProjectsListData = {
     body?: never;
