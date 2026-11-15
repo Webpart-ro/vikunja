@@ -45,6 +45,7 @@ type stagingVerifyInput struct {
 	Accept        string `header:"Accept" doc:"The original request's Accept header; only page loads (text/html) are redirected to the login page."`
 	Authorization string `header:"Authorization" doc:"Optional HTTP Basic credentials for automation."`
 	Session       string `cookie:"webpart_staging" doc:"The staging session cookie."`
+	Basic         string `query:"basic" doc:"Set to 0 in the middleware's address to refuse HTTP Basic credentials for that site (session cookie only)."`
 }
 
 type stagingVerifyOutput struct {
@@ -76,7 +77,7 @@ func RegisterStagingAuthRoutes(api huma.API) {
 	Register(api, huma.Operation{
 		OperationID: "staging-auth-verify",
 		Summary:     "Check a staging website request (forwardAuth)",
-		Description: "Called by the reverse proxy for every request to a protected staging website, with the original request's X-Forwarded-* headers and cookies. 200 lets it through: a valid staging session cookie or HTTP Basic credentials listed in stagingauth.basicauthusers. A browser page load (GET/HEAD accepting text/html) without a session gets a 302 to the login page, which returns to the original URL; anything else gets a 401.",
+		Description: "Called by the reverse proxy for every request to a protected staging website, with the original request's X-Forwarded-* headers and cookies. 200 lets it through: a valid staging session cookie or HTTP Basic credentials listed in stagingauth.basicauthusers (ignored when the proxy calls it with ?basic=0). A browser page load (GET/HEAD accepting text/html) without a session gets a 302 to the login page, which returns to the original URL; anything else gets a 401.",
 		Method:      http.MethodGet, Path: "/staging-auth/verify", Tags: tags,
 		Security: []map[string][]string{},
 	}, stagingAuthVerify)
@@ -102,7 +103,9 @@ func stagingAuthVerify(_ context.Context, in *stagingVerifyInput) (*stagingVerif
 			return out, nil
 		}
 	}
-	if strings.HasPrefix(in.Authorization, "Basic ") {
+	// With ?basic=0 the Authorization header is ignored: the request is treated like one
+	// without credentials (page loads still go to the login page, the rest get a 401).
+	if strings.HasPrefix(in.Authorization, "Basic ") && stagingauth.BasicAllowed(in.Basic) {
 		if stagingauth.ValidBasicAuth(in.Authorization, now) {
 			return out, nil
 		}

@@ -113,6 +113,17 @@ func ParseSessionToken(token string) (int64, error) {
 	return id, nil
 }
 
+// BasicAllowed reads the verify endpoint's "basic" query parameter: a forwardAuth middleware
+// can append ?basic=0 to its address so HTTP Basic credentials never open that site (e.g. the
+// production admin, which only takes a staging session cookie). Anything else keeps Basic on.
+func BasicAllowed(param string) bool {
+	switch strings.ToLower(strings.TrimSpace(param)) {
+	case "0", "false", "no", "off":
+		return false
+	}
+	return true
+}
+
 // basicCache remembers verified Basic credentials briefly: bcrypt is deliberately slow and
 // forwardAuth runs on every request (pages, assets, health checks).
 var basicCache = struct {

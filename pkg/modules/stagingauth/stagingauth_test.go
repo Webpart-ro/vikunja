@@ -110,6 +110,15 @@ func TestValidBasicAuth(t *testing.T) {
 	assert.False(t, ValidBasicAuth("Basic !!!", now))
 }
 
+func TestBasicAllowed(t *testing.T) {
+	for _, off := range []string{"0", "false", "FALSE", " no ", "off"} {
+		assert.False(t, BasicAllowed(off), off)
+	}
+	for _, on := range []string{"", "1", "true", "yes"} {
+		assert.True(t, BasicAllowed(on), on)
+	}
+}
+
 func TestLoginURL(t *testing.T) {
 	setup(t)
 	assert.Equal(t,
