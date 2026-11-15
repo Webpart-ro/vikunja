@@ -2526,7 +2526,7 @@ export const stagingAuthSession = <ThrowOnError extends boolean = true>(options:
 /**
  * Check a staging website request (forwardAuth)
  *
- * Called by the reverse proxy for every request to a protected staging website, with the original request's X-Forwarded-* headers and cookies. 200 lets it through: a valid staging session cookie or HTTP Basic credentials listed in stagingauth.basicauthusers. A browser page load (GET/HEAD accepting text/html) without a session gets a 302 to the login page, which returns to the original URL; anything else gets a 401.
+ * Called by the reverse proxy for every request to a protected staging website, with the original request's X-Forwarded-* headers and cookies. 200 lets it through: a valid staging session cookie or HTTP Basic credentials listed in stagingauth.basicauthusers (ignored when the proxy calls it with ?basic=0). A browser page load (GET/HEAD accepting text/html) without a session gets a 302 to the login page, which returns to the original URL; anything else gets a 401.
  */
 export const stagingAuthVerify = <ThrowOnError extends boolean = true>(options?: Options<StagingAuthVerifyData, ThrowOnError>): RequestResult<StagingAuthVerifyResponses, StagingAuthVerifyErrors, ThrowOnError> => (options?.client ?? client).get<StagingAuthVerifyResponses, StagingAuthVerifyErrors, ThrowOnError>({ url: '/staging-auth/verify', ...options });
 

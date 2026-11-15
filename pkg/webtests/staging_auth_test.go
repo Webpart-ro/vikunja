@@ -68,7 +68,11 @@ func setupStagingAuthTestEnv(t *testing.T) *echo.Echo {
 }
 
 func stagingVerify(e *echo.Echo, method string, headers map[string]string, cookie string) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(http.MethodGet, "/api/v2/staging-auth/verify", nil)
+	return stagingVerifyAt(e, "/api/v2/staging-auth/verify", method, headers, cookie)
+}
+
+func stagingVerifyAt(e *echo.Echo, path, method string, headers map[string]string, cookie string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, path, nil)
 	req.Header.Set("X-Forwarded-Host", "shop-staging.webpart.ro")
 	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Header.Set("X-Forwarded-Uri", "/ro/cart?step=2")
@@ -128,6 +132,27 @@ func TestStagingAuthVerify(t *testing.T) {
 		bad := "Basic " + base64.StdEncoding.EncodeToString([]byte("webpart:nope"))
 		assert.Equal(t, http.StatusOK, stagingVerify(e, http.MethodPost, map[string]string{"Authorization": good}, "").Code)
 		assert.Equal(t, http.StatusUnauthorized, stagingVerify(e, http.MethodGet, map[string]string{"Authorization": bad}, "").Code)
+	})
+	t.Run("basic=0 refuses basic credentials but keeps sessions and the login redirect", func(t *testing.T) {
+		const noBasic = "/api/v2/staging-auth/verify?basic=0"
+		good := "Basic " + base64.StdEncoding.EncodeToString([]byte("webpart:"+stagingBasicPassword))
+		admin := map[string]string{"X-Forwarded-Host": "admin.webpart.ro", "X-Forwarded-Uri": "/"}
+
+		// Valid Basic, non-page request: refused.
+		rec := stagingVerifyAt(e, noBasic, http.MethodPost, map[string]string{"Authorization": good}, "")
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		// Valid Basic, browser page load: sent to the login page instead of let through.
+		rec = stagingVerifyAt(e, noBasic, http.MethodGet, map[string]string{"Authorization": good, "X-Forwarded-Host": "admin.webpart.ro", "X-Forwarded-Uri": "/"}, "")
+		require.Equal(t, http.StatusFound, rec.Code)
+		assert.Equal(t, "https://tasks.webpart.ro/staging-login?rd=https%3A%2F%2Fadmin.webpart.ro%2F", rec.Header().Get("Location"))
+		// curl without anything (deploy smoke test): 401.
+		assert.Equal(t, http.StatusUnauthorized, stagingVerifyAt(e, noBasic, http.MethodGet, map[string]string{"Accept": "*/*"}, "").Code)
+		// Session cookie still passes.
+		token, err := stagingauth.NewSessionToken(testuser1.ID, time.Now())
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, stagingVerifyAt(e, noBasic, http.MethodGet, admin, token).Code)
+		// basic=1 (or absent) keeps the old behaviour.
+		assert.Equal(t, http.StatusOK, stagingVerifyAt(e, "/api/v2/staging-auth/verify?basic=1", http.MethodPost, map[string]string{"Authorization": good}, "").Code)
 	})
 }
 

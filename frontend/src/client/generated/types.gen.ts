@@ -10270,7 +10270,12 @@ export type StagingAuthVerifyData = {
         Authorization?: string;
     };
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Set to 0 in the middleware's address to refuse HTTP Basic credentials for that site (session cookie only).
+         */
+        basic?: string;
+    };
     url: '/staging-auth/verify';
 };
 
