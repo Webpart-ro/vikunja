@@ -328,7 +328,7 @@ func taskDevelopmentCreateBranch(ctx context.Context, in *struct {
 	if err != nil {
 		return nil, githubError(err)
 	}
-	client.ForgetDevelopment(repo.Owner, repo.Repo, key)
+	client.RememberCreatedBranch(repo.Owner, repo.Repo, key, branch)
 	return &singleBody[github.Branch]{Body: branch}, nil
 }
 

@@ -497,9 +497,67 @@ func (c *Client) DevelopmentCached(ctx context.Context, owner, repo, key string)
 		return nil, err
 	}
 	c.mu.Lock()
+	c.mergeCreatedBranches(cacheKey, dev)
 	c.devCache[cacheKey] = cachedDevelopment{dev: dev, expires: c.now().Add(developmentCacheTTL)}
 	c.mu.Unlock()
 	return dev, nil
+}
+
+// createdBranchTTL: GitHub's branch list can lag a few seconds behind a newly created ref,
+// and the first refetch after "Create branch" would cache a result without it.
+const createdBranchTTL = 5 * time.Minute
+
+type createdBranch struct {
+	branch  Branch
+	expires time.Time
+}
+
+// RememberCreatedBranch keeps a branch created through Vikunja visible on the task for a few
+// minutes, until GitHub's branch list includes it.
+func (c *Client) RememberCreatedBranch(owner, repo, key string, branch *Branch) {
+	if branch == nil {
+		return
+	}
+	cacheKey := developmentCacheKey(owner, repo, key)
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.created == nil {
+		c.created = map[string][]createdBranch{}
+	}
+	c.created[cacheKey] = append(c.created[cacheKey], createdBranch{branch: *branch, expires: c.now().Add(createdBranchTTL)})
+	delete(c.devCache, cacheKey)
+}
+
+// mergeCreatedBranches adds remembered branches missing from dev. Caller holds c.mu.
+func (c *Client) mergeCreatedBranches(cacheKey string, dev *RepoDevelopment) {
+	entries := c.created[cacheKey]
+	if len(entries) == 0 || dev == nil || !dev.Accessible {
+		return
+	}
+	now := c.now()
+	kept := entries[:0]
+	for _, e := range entries {
+		if now.After(e.expires) {
+			continue
+		}
+		kept = append(kept, e)
+		found := false
+		for _, b := range dev.Branches {
+			if b.Name == e.branch.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			b := e.branch
+			dev.Branches = append(dev.Branches, &b)
+		}
+	}
+	if len(kept) == 0 {
+		delete(c.created, cacheKey)
+		return
+	}
+	c.created[cacheKey] = kept
 }
 
 // ForgetDevelopment drops the cached data for one task in one repository (after creating a branch).
