@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -127,6 +128,24 @@ func TestStagingAuthVerify(t *testing.T) {
 		rec := stagingVerify(e, http.MethodGet, nil, "not-a-token")
 		assert.Equal(t, http.StatusFound, rec.Code)
 	})
+	t.Run("chat link unfurlers get the Webpart preview card, not the site", func(t *testing.T) {
+		for _, ua := range []string{
+			"Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
+			"Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+			"WhatsApp/2.23.20.0",
+			"facebookexternalhit/1.1 Facebot Twitterbot/1.0",
+		} {
+			rec := stagingVerify(e, http.MethodGet, map[string]string{"User-Agent": ua, "Accept": "*/*"}, "")
+			require.Equal(t, http.StatusFound, rec.Code, ua)
+			assert.Equal(t,
+				"https://tasks.webpart.ro/api/v2/staging-auth/preview?rd=https%3A%2F%2Fshop-staging.webpart.ro%2Fro%2Fcart%3Fstep%3D2",
+				rec.Header().Get("Location"), ua)
+		}
+	})
+	t.Run("unfurler on a host outside the cookie domain is refused", func(t *testing.T) {
+		rec := stagingVerify(e, http.MethodGet, map[string]string{"User-Agent": "Discordbot/2.0", "X-Forwarded-Host": "evil.com"}, "")
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	})
 	t.Run("basic credentials for automation", func(t *testing.T) {
 		good := "Basic " + base64.StdEncoding.EncodeToString([]byte("webpart:"+stagingBasicPassword))
 		bad := "Basic " + base64.StdEncoding.EncodeToString([]byte("webpart:nope"))
@@ -153,6 +172,33 @@ func TestStagingAuthVerify(t *testing.T) {
 		assert.Equal(t, http.StatusOK, stagingVerifyAt(e, noBasic, http.MethodGet, admin, token).Code)
 		// basic=1 (or absent) keeps the old behaviour.
 		assert.Equal(t, http.StatusOK, stagingVerifyAt(e, "/api/v2/staging-auth/verify?basic=1", http.MethodPost, map[string]string{"Authorization": good}, "").Code)
+	})
+}
+
+func TestStagingAuthPreview(t *testing.T) {
+	e := setupStagingAuthTestEnv(t)
+
+	get := func(rd string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodGet, "/api/v2/staging-auth/preview?rd="+url.QueryEscape(rd), nil)
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		return rec
+	}
+
+	t.Run("renders Webpart Open Graph tags for a staging URL", func(t *testing.T) {
+		rec := get("https://shop-staging.webpart.ro/ro/cart?step=2&x=<b>")
+		require.Equal(t, http.StatusOK, rec.Code, rec.Body.String())
+		assert.Contains(t, rec.Header().Get("Content-Type"), "text/html")
+		body := rec.Body.String()
+		assert.Contains(t, body, `<meta property="og:site_name" content="Webpart">`)
+		assert.Contains(t, body, `content="Webpart · staging · shop-staging.webpart.ro"`)
+		assert.Contains(t, body, `<meta property="og:image" content="https://webpart.ro/og.png">`)
+		assert.Contains(t, body, `noindex`)
+		assert.NotContains(t, body, "<b>", "the URL must be escaped")
+	})
+	t.Run("refuses URLs outside the cookie domain", func(t *testing.T) {
+		assert.Equal(t, http.StatusBadRequest, get("https://evil.com/").Code)
+		assert.Equal(t, http.StatusBadRequest, get("http://shop-staging.webpart.ro/").Code)
 	})
 }
 

@@ -10216,6 +10216,36 @@ export type AuthLinkShareResponses = {
 
 export type AuthLinkShareResponse = AuthLinkShareResponses[keyof AuthLinkShareResponses];
 
+export type StagingAuthPreviewData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * The staging URL being previewed; must be https on the configured cookie domain.
+         */
+        rd?: string;
+    };
+    url: '/staging-auth/preview';
+};
+
+export type StagingAuthPreviewErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type StagingAuthPreviewError = StagingAuthPreviewErrors[keyof StagingAuthPreviewErrors];
+
+export type StagingAuthPreviewResponses = {
+    /**
+     * OK
+     */
+    200: string;
+};
+
+export type StagingAuthPreviewResponse = StagingAuthPreviewResponses[keyof StagingAuthPreviewResponses];
+
 export type StagingAuthSessionData = {
     body: StagingSessionInputBodyWritable;
     path?: never;
@@ -10268,6 +10298,10 @@ export type StagingAuthVerifyData = {
          * Optional HTTP Basic credentials for automation.
          */
         Authorization?: string;
+        /**
+         * The original request's User-Agent; chat link unfurlers (Discordbot, Slackbot, …) are sent to the Webpart preview card instead of the login page.
+         */
+        'User-Agent'?: string;
     };
     path?: never;
     query?: {

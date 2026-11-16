@@ -46,12 +46,24 @@ type stagingVerifyInput struct {
 	Authorization string `header:"Authorization" doc:"Optional HTTP Basic credentials for automation."`
 	Session       string `cookie:"webpart_staging" doc:"The staging session cookie."`
 	Basic         string `query:"basic" doc:"Set to 0 in the middleware's address to refuse HTTP Basic credentials for that site (session cookie only)."`
+	UserAgent     string `header:"User-Agent" doc:"The original request's User-Agent; chat link unfurlers (Discordbot, Slackbot, …) are sent to the Webpart preview card instead of the login page."`
 }
 
 type stagingVerifyOutput struct {
 	Status   int
 	Location string `header:"Location" doc:"Where an unauthenticated browser is sent to log in."`
 	Cache    string `header:"Cache-Control"`
+}
+
+type stagingPreviewInput struct {
+	Redirect string `query:"rd" doc:"The staging URL being previewed; must be https on the configured cookie domain."`
+}
+
+type stagingPreviewOutput struct {
+	ContentType string `header:"Content-Type"`
+	Cache       string `header:"Cache-Control"`
+	Robots      string `header:"X-Robots-Tag"`
+	Body        []byte
 }
 
 type stagingSessionInput struct {
@@ -77,10 +89,18 @@ func RegisterStagingAuthRoutes(api huma.API) {
 	Register(api, huma.Operation{
 		OperationID: "staging-auth-verify",
 		Summary:     "Check a staging website request (forwardAuth)",
-		Description: "Called by the reverse proxy for every request to a protected staging website, with the original request's X-Forwarded-* headers and cookies. 200 lets it through: a valid staging session cookie or HTTP Basic credentials listed in stagingauth.basicauthusers (ignored when the proxy calls it with ?basic=0). A browser page load (GET/HEAD accepting text/html) without a session gets a 302 to the login page, which returns to the original URL; anything else gets a 401.",
+		Description: "Called by the reverse proxy for every request to a protected staging website, with the original request's X-Forwarded-* headers and cookies. 200 lets it through: a valid staging session cookie or HTTP Basic credentials listed in stagingauth.basicauthusers (ignored when the proxy calls it with ?basic=0). A browser page load (GET/HEAD accepting text/html) without a session gets a 302 to the login page, which returns to the original URL; a chat link unfurler (by User-Agent) gets a 302 to the preview card; anything else gets a 401.",
 		Method:      http.MethodGet, Path: "/staging-auth/verify", Tags: tags,
 		Security: []map[string][]string{},
 	}, stagingAuthVerify)
+
+	Register(api, huma.Operation{
+		OperationID: "staging-auth-preview",
+		Summary:     "Link preview card for a staging URL",
+		Description: "An HTML page with Webpart Open Graph tags for a staging URL. /staging-auth/verify sends chat link unfurlers here, so a shared staging link shows a Webpart card instead of the login page. It never reveals the staging site's content; rd must be https on the cookie domain.",
+		Method:      http.MethodGet, Path: "/staging-auth/preview", Tags: tags,
+		Security: []map[string][]string{},
+	}, stagingAuthPreview)
 
 	Register(api, huma.Operation{
 		OperationID: "staging-auth-session",
@@ -118,17 +138,39 @@ func stagingAuthVerify(_ context.Context, in *stagingVerifyInput) (*stagingVerif
 	method := strings.ToUpper(in.Method)
 	host := strings.TrimSpace(strings.Split(in.Host, ",")[0])
 	pageLoad := method == "" || method == http.MethodGet || method == http.MethodHead
-	if pageLoad && strings.Contains(in.Accept, "text/html") && stagingauth.HostAllowed(stripPort(host)) {
+	if pageLoad && stagingauth.HostAllowed(stripPort(host)) {
 		uri := in.URI
 		if !strings.HasPrefix(uri, "/") {
 			uri = "/" + uri
 		}
-		out.Status = http.StatusFound
-		out.Location = stagingauth.LoginURL("https://" + host + uri)
-		return out, nil
+		target := "https://" + host + uri
+		// Link unfurlers get the Webpart card; they are never let through to the site.
+		if stagingauth.IsLinkPreviewBot(in.UserAgent) {
+			out.Status = http.StatusFound
+			out.Location = stagingauth.PreviewURL(target)
+			return out, nil
+		}
+		if strings.Contains(in.Accept, "text/html") {
+			out.Status = http.StatusFound
+			out.Location = stagingauth.LoginURL(target)
+			return out, nil
+		}
 	}
 	out.Status = http.StatusUnauthorized
 	return out, nil
+}
+
+func stagingAuthPreview(_ context.Context, in *stagingPreviewInput) (*stagingPreviewOutput, error) {
+	target, err := stagingauth.ValidateRedirect(in.Redirect)
+	if err != nil {
+		return nil, huma.Error400BadRequest(err.Error())
+	}
+	return &stagingPreviewOutput{
+		ContentType: "text/html; charset=utf-8",
+		Cache:       "public, max-age=3600",
+		Robots:      "noindex, nofollow",
+		Body:        []byte(stagingauth.PreviewHTML(target)),
+	}, nil
 }
 
 func stripPort(host string) string {
