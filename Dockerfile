@@ -14,22 +14,24 @@ COPY frontend/ ./
 ARG RELEASE_VERSION=dev
 RUN echo "{\"VERSION\": \"${RELEASE_VERSION/-g/-}\"}" > src/version.json && pnpm run build
 
-FROM --platform=$BUILDPLATFORM ghcr.io/techknowlogick/xgo:go-1.27.x@sha256:7d5cab968132bf21285686bde17e902e0af080a16d08b439deb7265b276ac6f9 AS apibuilder
-
-RUN go install github.com/magefile/mage@latest && \
-    mv /go/bin/mage /usr/local/go/bin
+# Webpart: plain Go instead of the multi-GB xgo cross-compile image (we only ship
+# linux/amd64, built on an amd64 runner). Static binary like upstream's xgo build;
+# CGO stays on for the sqlite driver.
+FROM golang:1.27-bookworm@sha256:4fa7c968ba93f1635670522dbb01a2c78150443e1385746924566079f36570ea AS apibuilder
 
 WORKDIR /go/src/code.vikunja.io/api
+COPY go.mod go.sum ./
+# Modules live in a layer (not a cache mount) so the GitHub Actions layer cache keeps them.
+RUN go mod download
 COPY . ./
 COPY --from=frontendbuilder /build/dist ./frontend/dist
 
-ARG TARGETOS TARGETARCH TARGETVARIANT RELEASE_VERSION
-ENV RELEASE_VERSION=$RELEASE_VERSION
-
-RUN export PATH=$PATH:$GOPATH/bin && \
-	mage build:clean && \
-    (cd build && mage release:xgo vikunja "${TARGETOS}/${TARGETARCH}/${TARGETVARIANT}")
-
+ARG RELEASE_VERSION=dev
+RUN --mount=type=cache,target=/root/.cache/go-build \
+	mkdir -p /build && \
+	CGO_ENABLED=1 go build -trimpath -tags "osusergo netgo" \
+	-ldflags "-s -w -linkmode external -extldflags '-static' -X 'code.vikunja.io/api/pkg/version.Version=${RELEASE_VERSION}' -X 'main.Tags=osusergo netgo'" \
+	-o /build/vikunja-webpart .
 RUN mkdir -p /tmp && chmod 1777 /tmp
 
 #  ┬─┐┬ ┐┌┐┐┌┐┐┬─┐┬─┐
