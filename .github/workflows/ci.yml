@@ -3,12 +3,18 @@ name: ci
 env:
   DO_NOT_TRACK: 1
 
+# Webpart: PR checks are lint, typecheck, unit tests and builds (~3 min). The full upstream
+# suite (every database, e2e) runs on demand: Actions -> ci -> Run workflow -> full.
+# Pushes to webpart don't re-run CI; the PR already did.
 on:
   pull_request:
   merge_group:
-  push:
-    branches:
-      - webpart
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the whole upstream test suite (all databases, e2e)
+        type: boolean
+        default: true
 
 concurrency:
   # main merges use a unique run_id so they don't cancel each other
@@ -22,6 +28,8 @@ jobs:
   test:
     name: Test
     uses: ./.github/workflows/test.yml
+    with:
+      full: ${{ github.event_name == 'workflow_dispatch' && inputs.full }}
     secrets: inherit
 
   # Webpart: upstream's release job (binaries, Docker Hub) is removed; our image is
