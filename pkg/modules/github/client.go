@@ -68,6 +68,7 @@ type Client struct {
 	installations map[string]int64 // "owner/repo" -> installation id
 	tokens        map[int64]cachedToken
 	devCache      map[string]cachedDevelopment
+	created       map[string][]createdBranch // recently created branches, see RememberCreatedBranch
 }
 
 type cachedToken struct {

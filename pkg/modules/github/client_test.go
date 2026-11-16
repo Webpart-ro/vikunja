@@ -278,3 +278,33 @@ func TestValidBranchName(t *testing.T) {
 		assert.False(t, ValidBranchName(bad), bad)
 	}
 }
+
+func TestCreatedBranchVisibleWhileGitHubLags(t *testing.T) {
+	config.InitDefaultConfig()
+	client, _ := newTestClient(t, true)
+	now := time.Now()
+	client.now = func() time.Time { return now }
+	ctx := context.Background()
+
+	// The fake branch list never includes created refs, like GitHub right after creation.
+	branch, err := client.CreateBranch(ctx, "acme", "shop", "", "HS-334-just-created")
+	require.NoError(t, err)
+	client.RememberCreatedBranch("acme", "shop", "HS-334", branch)
+
+	names := func() []string {
+		dev, err := client.DevelopmentCached(ctx, "acme", "shop", "HS-334")
+		require.NoError(t, err)
+		out := []string{}
+		for _, b := range dev.Branches {
+			out = append(out, b.Name)
+		}
+		return out
+	}
+
+	assert.Contains(t, names(), "HS-334-just-created")
+	assert.Contains(t, names(), "HS-334-release-day", "listed branches are kept")
+	assert.Contains(t, names(), "HS-334-just-created", "still there on a cached read")
+
+	now = now.Add(createdBranchTTL + 2*developmentCacheTTL)
+	assert.NotContains(t, names(), "HS-334-just-created", "forgotten once GitHub has had time to list it")
+}
