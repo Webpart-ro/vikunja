@@ -326,7 +326,8 @@ var unauthenticatedAPIPaths = map[string]bool{
 	// Webpart: GitHub App webhook, authenticated by its HMAC signature instead of a token
 	"/api/v2/integrations/github/webhook": true,
 	// Webpart: Traefik forwardAuth for staging sites; checks its own cookie / Basic credentials
-	"/api/v2/staging-auth/verify": true,
+	"/api/v2/staging-auth/verify":  true,
+	"/api/v2/staging-auth/preview": true,
 
 	"/api/v2/register":                       true,
 	"/api/v2/invite-links/check":             true,
