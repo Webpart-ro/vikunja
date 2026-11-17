@@ -150,6 +150,9 @@ func NewEcho() *echo.Echo {
 		JSONSerializer:               jsonSerializer{},
 	})
 
+	// Before routing: forwardAuth calls arrive with the staging request's method.
+	e.Pre(normalizeStagingAuthVerify())
+
 	e.IPExtractor = newIPExtractor(config.ServiceIPExtractionMethod.GetString(), config.ServiceTrustedProxies.GetString())
 
 	e.Logger = log.NewEchoLogger(config.LogEnabled.GetBool(), config.LogHTTP.GetString(), config.LogHTTPLevel.GetString(), config.LogFormat.GetString())
