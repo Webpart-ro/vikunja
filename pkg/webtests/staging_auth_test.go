@@ -175,6 +175,38 @@ func TestStagingAuthVerify(t *testing.T) {
 	})
 }
 
+// Traefik's forwardAuth sends the staging request's own method and Content-Type (no body):
+// a POST add-to-cart or back-office login must be checked, not rejected with 405/415.
+func TestStagingAuthVerifyNonGetForwardAuth(t *testing.T) {
+	e := setupStagingAuthTestEnv(t)
+	call := func(method, contentType, cookie string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(method, "/api/v2/staging-auth/verify", nil)
+		req.Header.Set("X-Forwarded-Host", "shop-staging.webpart.ro")
+		req.Header.Set("X-Forwarded-Proto", "https")
+		req.Header.Set("X-Forwarded-Uri", "/cos")
+		req.Header.Set("X-Forwarded-Method", method)
+		req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
+		if contentType != "" {
+			req.Header.Set("Content-Type", contentType)
+		}
+		if cookie != "" {
+			req.AddCookie(&http.Cookie{Name: stagingauth.CookieName, Value: cookie})
+		}
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		return rec
+	}
+	token, err := stagingauth.NewSessionToken(testuser1.ID, time.Now())
+	require.NoError(t, err)
+
+	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodHead, http.MethodOptions} {
+		for _, ct := range []string{"", "application/x-www-form-urlencoded; charset=UTF-8", "application/json", "multipart/form-data; boundary=x"} {
+			assert.Equal(t, http.StatusOK, call(method, ct, token).Code, "%s %q with a session", method, ct)
+			assert.Equal(t, http.StatusUnauthorized, call(method, ct, "").Code, "%s %q without a session", method, ct)
+		}
+	}
+}
+
 func TestStagingAuthPreview(t *testing.T) {
 	e := setupStagingAuthTestEnv(t)
 
