@@ -26,16 +26,18 @@ import (
 const stagingAuthVerifyPath = "/api/v2/staging-auth/verify"
 
 // Webpart: Traefik's forwardAuth calls the verify endpoint with the original request's
-// method and headers (Content-Type included), but never its body. Without this, a POST to
-// a staging site (add to cart, back-office login) hit the GET-only route and the form-body
-// guard, and Traefik passed the 405/415 straight to the browser. Every call is turned into
-// a bodiless GET before routing; the original method stays in X-Forwarded-Method.
+// headers (Content-Type included) but never its body, as a GET or, depending on the proxy
+// version and config, with the original method. Without this, a POST to a staging site (add
+// to cart, back-office login) hit the GET-only route (405) or, as a GET still carrying the
+// form Content-Type, the form-body guard (415), and Traefik passed that to the browser.
+// Every call is turned into a bodiless GET without a Content-Type before routing; the
+// original method stays in X-Forwarded-Method.
 func normalizeStagingAuthVerify() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
 			req := c.Request()
-			if req.URL.Path == stagingAuthVerifyPath && req.Method != http.MethodGet {
-				if req.Header.Get("X-Forwarded-Method") == "" {
+			if req.URL.Path == stagingAuthVerifyPath {
+				if req.Header.Get("X-Forwarded-Method") == "" && req.Method != http.MethodGet {
 					req.Header.Set("X-Forwarded-Method", req.Method)
 				}
 				req.Method = http.MethodGet
