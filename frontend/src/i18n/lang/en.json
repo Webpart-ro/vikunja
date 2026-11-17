@@ -1901,6 +1901,16 @@
     "projectInTrashByYou": "This project is in the trash. You deleted it {since}."
   },
   "webpart": {
+    "profilePhoto": {
+      "title": "Profile photo",
+      "current": "Your profile photo",
+      "upload": "Upload photo",
+      "change": "Change photo",
+      "remove": "Remove",
+      "hint": "Square photos look best; others are cropped to the center. Shown on your tasks and comments.",
+      "moreOptions": "More avatar options",
+      "synced": "Your photo comes from your login provider. Change it there."
+    },
     "stagingLinks": {
       "title": "Staging links",
       "description": "Private links that open one staging site for a client who has no Tasks account. The client clicks the link once and the site stays open in that browser until the link expires. A link never opens any other site or admin.webpart.ro.",

@@ -115,7 +115,8 @@
 				<AssigneeList
 					v-if="task.assignees.length > 0"
 					:assignees="task.assignees"
-					:avatar-size="24"
+					:avatar-size="32"
+					class="kanban-card__assignees"
 				/>
 				<ChecklistSummary
 					:task="task"
@@ -385,6 +386,23 @@ $task-background: var(--white);
 
 		:deep(.checklist-summary) {
 			padding-inline-start: 0;
+		}
+
+		// Assignees sit at the trailing end of the footer, big enough to recognise at a glance.
+		.kanban-card__assignees {
+			margin-inline-start: auto;
+			order: 99;
+
+			:deep(.user img),
+			:deep(.user .user-avatar-placeholder) {
+				object-fit: cover;
+				border: 2px solid var(--white);
+				box-shadow: 0 0 0 1px var(--grey-300), 0 1px 3px hsla(0, 0%, 0%, .15);
+			}
+
+			:deep(.assignee:not(:first-child)) {
+				margin-inline-start: -.5rem;
+			}
 		}
 
 		.assignees {
