@@ -184,6 +184,11 @@ const router = createRouter({
 					component: () => import('@/views/user/settings/ApiTokens.vue'),
 				},
 				{
+					path: '/user/settings/staging-links',
+					name: 'user.settings.stagingLinks',
+					component: () => import('@/views/user/settings/StagingClientLinks.vue'),
+				},
+				{
 					path: '/user/settings/sessions',
 					name: 'user.settings.sessions',
 					component: () => import('@/views/user/settings/Sessions.vue'),

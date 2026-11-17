@@ -23,6 +23,7 @@ package apiv2
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -30,6 +31,7 @@ import (
 	"code.vikunja.io/api/pkg/config"
 	"code.vikunja.io/api/pkg/db"
 	"code.vikunja.io/api/pkg/log"
+	"code.vikunja.io/api/pkg/models"
 	"code.vikunja.io/api/pkg/modules/humabridge"
 	"code.vikunja.io/api/pkg/modules/stagingauth"
 	"code.vikunja.io/api/pkg/user"
@@ -45,14 +47,18 @@ type stagingVerifyInput struct {
 	Accept        string `header:"Accept" doc:"The original request's Accept header; only page loads (text/html) are redirected to the login page."`
 	Authorization string `header:"Authorization" doc:"Optional HTTP Basic credentials for automation."`
 	Session       string `cookie:"webpart_staging" doc:"The staging session cookie."`
+	ClientSession string `cookie:"webpart_client" doc:"A client link session cookie (host-only), set when a client opens a staging client link."`
 	Basic         string `query:"basic" doc:"Set to 0 in the middleware's address to refuse HTTP Basic credentials for that site (session cookie only)."`
 	UserAgent     string `header:"User-Agent" doc:"The original request's User-Agent; chat link unfurlers (Discordbot, Slackbot, …) are sent to the Webpart preview card instead of the login page."`
 }
 
 type stagingVerifyOutput struct {
-	Status   int
-	Location string `header:"Location" doc:"Where an unauthenticated browser is sent to log in."`
-	Cache    string `header:"Cache-Control"`
+	Status      int
+	Location    string `header:"Location" doc:"Where an unauthenticated browser is sent to log in."`
+	Cache       string `header:"Cache-Control"`
+	SetCookie   string `header:"Set-Cookie" doc:"The client link session cookie, when a client link key was just exchanged."`
+	ContentType string `header:"Content-Type"`
+	Body        []byte
 }
 
 type stagingPreviewInput struct {
@@ -138,6 +144,14 @@ func stagingAuthVerify(_ context.Context, in *stagingVerifyInput) (*stagingVerif
 	method := strings.ToUpper(in.Method)
 	host := strings.TrimSpace(strings.Split(in.Host, ",")[0])
 	pageLoad := method == "" || method == http.MethodGet || method == http.MethodHead
+
+	// Client links open one staging site without a Tasks account. Never on ?basic=0 routers:
+	// those guard production (admin.webpart.ro), which only takes a Tasks session.
+	if stagingauth.BasicAllowed(in.Basic) {
+		if done, err := stagingClientAccess(in, out, stripPort(host), pageLoad, now); done || err != nil {
+			return out, err
+		}
+	}
 	if pageLoad && stagingauth.HostAllowed(stripPort(host)) {
 		uri := in.URI
 		if !strings.HasPrefix(uri, "/") {
@@ -158,6 +172,109 @@ func stagingAuthVerify(_ context.Context, in *stagingVerifyInput) (*stagingVerif
 	}
 	out.Status = http.StatusUnauthorized
 	return out, nil
+}
+
+// stagingClientAccess lets a client link session through, or swaps a client link key in the
+// URL for the session cookie. It returns true when out holds the final answer.
+func stagingClientAccess(in *stagingVerifyInput, out *stagingVerifyOutput, host string, pageLoad bool, now time.Time) (bool, error) {
+	if in.ClientSession != "" {
+		linkID, tokenHost, err := stagingauth.ParseClientToken(in.ClientSession)
+		if err == nil && tokenHost == host && stagingClientLinkActive(linkID, host, now) {
+			return true, nil
+		}
+	}
+
+	key, rest := stagingauth.SplitClientKey(in.URI)
+	if key == "" || !pageLoad || !stagingauth.HostAllowed(host) {
+		return false, nil
+	}
+	if !strings.HasPrefix(rest, "/") {
+		rest = "/" + rest
+	}
+	target := "https://" + host + rest
+
+	s := db.NewSession()
+	defer s.Close()
+	link, err := models.ActiveStagingClientLinkByKey(s, key, host, now)
+	if err != nil {
+		_ = s.Rollback()
+		return false, err
+	}
+	if link == nil {
+		out.Status = http.StatusForbidden
+		out.ContentType = "text/html; charset=utf-8"
+		out.Body = []byte(stagingauth.ClientLinkInvalidHTML(target))
+		return true, nil
+	}
+	if err := s.Commit(); err != nil {
+		return false, err
+	}
+
+	token, err := stagingauth.NewClientToken(link.ID, host, link.ExpiresAt, now)
+	if err != nil {
+		return false, err
+	}
+	// Host-only (no Domain): the session opens this one site and nothing else on webpart.ro.
+	cookie := &http.Cookie{
+		Name:     stagingauth.ClientCookieName,
+		Value:    token,
+		Path:     "/",
+		MaxAge:   int(link.ExpiresAt.Sub(now).Seconds()),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	out.Status = http.StatusFound
+	out.Location = target
+	out.SetCookie = cookie.String()
+	return true, nil
+}
+
+// stagingClientLinkCache keeps "this link is still active for this host" for a minute, like
+// stagingUserCache: a revoked or expired link stops working within a minute.
+var stagingClientLinkCache = struct {
+	sync.Mutex
+	until map[string]time.Time
+}{until: map[string]time.Time{}}
+
+func stagingClientLinkActive(linkID int64, host string, now time.Time) bool {
+	cacheKey := host + "#" + strconv.FormatInt(linkID, 10)
+	stagingClientLinkCache.Lock()
+	if until, ok := stagingClientLinkCache.until[cacheKey]; ok && now.Before(until) {
+		stagingClientLinkCache.Unlock()
+		return true
+	}
+	stagingClientLinkCache.Unlock()
+
+	s := db.NewSession()
+	defer s.Close()
+	active, err := models.StagingClientLinkActive(s, linkID, host, now)
+	if err != nil {
+		log.Errorf("staging auth: could not check client link %d: %s", linkID, err)
+		return false
+	}
+	if !active {
+		return false
+	}
+	stagingClientLinkCache.Lock()
+	if len(stagingClientLinkCache.until) > 1000 {
+		stagingClientLinkCache.until = map[string]time.Time{}
+	}
+	stagingClientLinkCache.until[cacheKey] = now.Add(time.Minute)
+	stagingClientLinkCache.Unlock()
+	return true
+}
+
+// forgetStagingClientLink drops a revoked link from the cache on this instance right away.
+func forgetStagingClientLink(linkID int64) {
+	suffix := "#" + strconv.FormatInt(linkID, 10)
+	stagingClientLinkCache.Lock()
+	for k := range stagingClientLinkCache.until {
+		if strings.HasSuffix(k, suffix) {
+			delete(stagingClientLinkCache.until, k)
+		}
+	}
+	stagingClientLinkCache.Unlock()
 }
 
 func stagingAuthPreview(_ context.Context, in *stagingPreviewInput) (*stagingPreviewOutput, error) {

@@ -1,0 +1,15 @@
+# Webpart staging client links. Keys: "fixture-active-key" (active), "fixture-expired-key" (expired).
+- id: 1
+  label: "Active client"
+  host: "shop-staging.webpart.ro"
+  token_hash: "5710a984edb5ed0094069902ac85dc06d95058562e11e331c503818963193535"
+  expires_at: 2099-01-01 00:00:00
+  created_by_id: 1
+  created: 2026-11-17 00:00:00
+- id: 2
+  label: "Expired client"
+  host: "shop-staging.webpart.ro"
+  token_hash: "e434dc180826fe38c488e98fdffa40bbfbd6f8b6858930630b6e1bd9533797d3"
+  expires_at: 2020-01-01 00:00:00
+  created_by_id: 1
+  created: 2020-01-01 00:00:00

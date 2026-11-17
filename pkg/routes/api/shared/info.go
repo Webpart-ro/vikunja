@@ -32,6 +32,7 @@ import (
 	"code.vikunja.io/api/pkg/modules/migration/trello"
 	vikunja_file "code.vikunja.io/api/pkg/modules/migration/vikunja-file"
 	"code.vikunja.io/api/pkg/modules/migration/wekan"
+	"code.vikunja.io/api/pkg/modules/stagingauth"
 	"code.vikunja.io/api/pkg/version"
 )
 
@@ -49,6 +50,7 @@ type VikunjaInfos struct {
 	TotpEnabled                bool      `json:"totp_enabled" doc:"Whether TOTP two-factor authentication is enabled."`
 	TotpEnforced               bool      `json:"totp_enforced" doc:"Whether local accounts must enable TOTP two-factor authentication before using the API."`
 	GithubEnabled              bool      `json:"github_enabled" doc:"Whether the GitHub integration (branches, pull requests and CI on tasks) is configured."`
+	StagingAuthEnabled         bool      `json:"staging_auth_enabled" doc:"Whether Webpart staging single sign-on (and staging client links) is enabled."`
 	Legal                      LegalInfo `json:"legal" doc:"Links to the instance's legal documents."`
 	CaldavEnabled              bool      `json:"caldav_enabled" doc:"Whether the CalDAV interface is enabled."`
 	AuthInfo                   AuthInfo  `json:"auth" doc:"The authentication methods enabled on this instance."`
@@ -155,6 +157,7 @@ func BuildInfo() VikunjaInfos {
 		TotpEnabled:            config.ServiceEnableTotp.GetBool(),
 		TotpEnforced:           config.ServiceEnableTotp.GetBool() && config.ServiceEnforceTotp.GetBool(),
 		GithubEnabled:          github.Enabled(),
+		StagingAuthEnabled:     stagingauth.Enabled(),
 		CaldavEnabled:          config.ServiceEnableCaldav.GetBool(),
 		EmailRemindersEnabled:  config.ServiceEnableEmailReminders.GetBool(),
 		UserDeletionEnabled:    config.ServiceEnableUserDeletion.GetBool(),

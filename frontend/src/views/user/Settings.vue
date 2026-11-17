@@ -82,6 +82,11 @@ const navigationItems = computed(() => {
 			routeName: 'user.settings.apiTokens',
 		},
 		{
+			title: t('webpart.stagingLinks.title'),
+			routeName: 'user.settings.stagingLinks',
+			condition: configStore.staging_auth_enabled,
+		},
+		{
 			title: t('user.settings.sessions.title'),
 			routeName: 'user.settings.sessions',
 		},
