@@ -34,7 +34,10 @@ let errors: unknown[] = []
 async function mountComponent() {
 	const router = createRouter({
 		history: createMemoryHistory(),
-		routes: [{path: '/user/settings/general', name: 'user.settings.general', component: General}],
+		routes: [
+			{path: '/user/settings/general', name: 'user.settings.general', component: General},
+			{path: '/user/settings/avatar', name: 'user.settings.avatar', component: {render: () => null}},
+		],
 	})
 	await router.push('/user/settings/general')
 	await router.isReady()

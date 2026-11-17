@@ -6,6 +6,12 @@
 	>
 		<div class="field-group">
 			<FormField
+				:label="$t('webpart.profilePhoto.title')"
+				layout="two-col"
+			>
+				<ProfilePhoto />
+			</FormField>
+			<FormField
 				:label="$t('user.settings.general.name')"
 				layout="two-col"
 			>
@@ -319,6 +325,7 @@ import isEqual from 'fast-deep-equal'
 import {PrefixMode} from '@/modules/quickAddMagic'
 
 import ProjectSearch from '@/components/tasks/partials/ProjectSearch.vue'
+import ProfilePhoto from './ProfilePhoto.vue'
 import Multiselect from '@/components/input/Multiselect.vue'
 import CustomTransition from '@/components/misc/CustomTransition.vue'
 import FormField from '@/components/input/FormField.vue'
