@@ -1901,6 +1901,26 @@
     "projectInTrashByYou": "This project is in the trash. You deleted it {since}."
   },
   "webpart": {
+    "stagingLinks": {
+      "title": "Staging links",
+      "description": "Private links that open one staging site for a client who has no Tasks account. The client clicks the link once and the site stays open in that browser until the link expires. A link never opens any other site or admin.webpart.ro.",
+      "label": "For",
+      "labelPlaceholder": "e.g. the client's name",
+      "host": "Staging site",
+      "validFor": "Valid for",
+      "days": "{count} days",
+      "create": "Create link",
+      "created": "Send this link to the client. It is only shown now; if you lose it, revoke it and create a new one.",
+      "expires": "Expires",
+      "expired": "Expired",
+      "lastUsed": "Last opened",
+      "never": "Never",
+      "revoke": "Revoke",
+      "revokeHeader": "Revoke staging link",
+      "revokeText": "\"{label}\" will lose access to {host} within a minute.",
+      "revokeSuccess": "The link was revoked.",
+      "none": "No staging links yet."
+    },
     "list": {
       "groupBy": "Group by",
       "groupNone": "No grouping",

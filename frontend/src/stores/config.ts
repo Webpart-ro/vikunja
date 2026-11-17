@@ -82,6 +82,7 @@ function defaultConfig(): ConfigState {
 		totp_enabled: true,
 		totp_enforced: false,
 		github_enabled: false,
+		staging_auth_enabled: false,
 		enabled_background_providers: [],
 		legal: {
 			links: [],

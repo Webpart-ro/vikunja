@@ -85,6 +85,7 @@ func SetupTests() {
 		"totp",
 		"oauth_codes",
 		"project_github_repos",
+		"staging_client_links",
 		"user_identities",
 		"notifications",
 	)

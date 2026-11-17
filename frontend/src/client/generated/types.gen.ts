@@ -1552,6 +1552,18 @@ export type PaginatedSession = {
     total_pages?: number;
 };
 
+export type PaginatedStagingClientLink = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    items?: Array<StagingClientLink> | null;
+    page?: number;
+    per_page?: number;
+    total?: number;
+    total_pages?: number;
+};
+
 export type PaginatedTask = {
     /**
      * A URL to the JSON Schema for this object.
@@ -2422,6 +2434,95 @@ export type ShareCounts = {
      * Number of user-project shares.
      */
     readonly user_shares?: number;
+};
+
+export type StagingClientLink = {
+    /**
+     * When the link was created.
+     */
+    readonly created?: string;
+    /**
+     * The id of the user who created the link.
+     */
+    readonly created_by_id?: number;
+    /**
+     * When the link (and every browser session opened with it) stops working.
+     */
+    readonly expires_at?: string;
+    /**
+     * The one staging host this link opens, e.g. shop-staging.webpart.ro.
+     */
+    host?: string;
+    /**
+     * The id of this client link.
+     */
+    readonly id?: number;
+    /**
+     * Who the link is for, e.g. the client's name.
+     */
+    label?: string;
+    /**
+     * When the link was last opened; null if never.
+     */
+    readonly last_used_at?: string | null;
+};
+
+export type StagingClientLinkCreateInputBody = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * How many days the link works. Defaults to 30.
+     */
+    days?: number;
+    /**
+     * The staging site the link opens: a host (shop-staging.webpart.ro) or a URL on it.
+     */
+    host?: string;
+    /**
+     * Who the link is for, e.g. the client's name.
+     */
+    label?: string;
+};
+
+export type StagingClientLinkCreated = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * When the link was created.
+     */
+    readonly created?: string;
+    /**
+     * The id of the user who created the link.
+     */
+    readonly created_by_id?: number;
+    /**
+     * When the link (and every browser session opened with it) stops working.
+     */
+    readonly expires_at?: string;
+    /**
+     * The one staging host this link opens, e.g. shop-staging.webpart.ro.
+     */
+    host?: string;
+    /**
+     * The id of this client link.
+     */
+    readonly id?: number;
+    /**
+     * Who the link is for, e.g. the client's name.
+     */
+    label?: string;
+    /**
+     * When the link was last opened; null if never.
+     */
+    readonly last_used_at?: string | null;
+    /**
+     * The link to send to the client. It holds the key, which is shown only in this response.
+     */
+    readonly url?: string;
 };
 
 export type StagingSessionInputBody = {
@@ -4257,6 +4358,10 @@ export type VikunjaInfos = {
      */
     public_teams_enabled?: boolean;
     /**
+     * Whether Webpart staging single sign-on (and staging client links) is enabled.
+     */
+    staging_auth_enabled?: boolean;
+    /**
      * Whether task attachments are enabled.
      */
     task_attachments_enabled?: boolean;
@@ -5051,6 +5156,14 @@ export type PaginatedSessionWritable = {
     total_pages?: number;
 };
 
+export type PaginatedStagingClientLinkWritable = {
+    items?: Array<StagingClientLinkWritable> | null;
+    page?: number;
+    per_page?: number;
+    total?: number;
+    total_pages?: number;
+};
+
 export type PaginatedTaskWritable = {
     items?: Array<TaskWritable> | null;
     page?: number;
@@ -5462,6 +5575,43 @@ export type SavedFilterReadBodyWritable = {
      * The title of the filter.
      */
     title?: string;
+};
+
+export type StagingClientLinkWritable = {
+    /**
+     * The one staging host this link opens, e.g. shop-staging.webpart.ro.
+     */
+    host?: string;
+    /**
+     * Who the link is for, e.g. the client's name.
+     */
+    label?: string;
+};
+
+export type StagingClientLinkCreateInputBodyWritable = {
+    /**
+     * How many days the link works. Defaults to 30.
+     */
+    days?: number;
+    /**
+     * The staging site the link opens: a host (shop-staging.webpart.ro) or a URL on it.
+     */
+    host?: string;
+    /**
+     * Who the link is for, e.g. the client's name.
+     */
+    label?: string;
+};
+
+export type StagingClientLinkCreatedWritable = {
+    /**
+     * The one staging host this link opens, e.g. shop-staging.webpart.ro.
+     */
+    host?: string;
+    /**
+     * Who the link is for, e.g. the client's name.
+     */
+    label?: string;
 };
 
 export type StagingSessionInputBodyWritable = {
@@ -6210,6 +6360,10 @@ export type VikunjaInfosWritable = {
      * Whether public teams are enabled.
      */
     public_teams_enabled?: boolean;
+    /**
+     * Whether Webpart staging single sign-on (and staging client links) is enabled.
+     */
+    staging_auth_enabled?: boolean;
     /**
      * Whether task attachments are enabled.
      */
@@ -10216,6 +10370,86 @@ export type AuthLinkShareResponses = {
 
 export type AuthLinkShareResponse = AuthLinkShareResponses[keyof AuthLinkShareResponses];
 
+export type StagingClientLinksListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/staging-auth/client-links';
+};
+
+export type StagingClientLinksListErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type StagingClientLinksListError = StagingClientLinksListErrors[keyof StagingClientLinksListErrors];
+
+export type StagingClientLinksListResponses = {
+    /**
+     * OK
+     */
+    200: PaginatedStagingClientLink;
+};
+
+export type StagingClientLinksListResponse = StagingClientLinksListResponses[keyof StagingClientLinksListResponses];
+
+export type StagingClientLinksCreateData = {
+    body: StagingClientLinkCreateInputBodyWritable;
+    path?: never;
+    query?: never;
+    url: '/staging-auth/client-links';
+};
+
+export type StagingClientLinksCreateErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type StagingClientLinksCreateError = StagingClientLinksCreateErrors[keyof StagingClientLinksCreateErrors];
+
+export type StagingClientLinksCreateResponses = {
+    /**
+     * Created
+     */
+    201: StagingClientLinkCreated;
+};
+
+export type StagingClientLinksCreateResponse = StagingClientLinksCreateResponses[keyof StagingClientLinksCreateResponses];
+
+export type StagingClientLinksDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * The id of the client link.
+         */
+        link: number;
+    };
+    query?: never;
+    url: '/staging-auth/client-links/{link}';
+};
+
+export type StagingClientLinksDeleteErrors = {
+    /**
+     * Error
+     */
+    default: VikunjaErrorModel;
+};
+
+export type StagingClientLinksDeleteError = StagingClientLinksDeleteErrors[keyof StagingClientLinksDeleteErrors];
+
+export type StagingClientLinksDeleteResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type StagingClientLinksDeleteResponse = StagingClientLinksDeleteResponses[keyof StagingClientLinksDeleteResponses];
+
 export type StagingAuthPreviewData = {
     body?: never;
     path?: never;
@@ -10324,9 +10558,9 @@ export type StagingAuthVerifyError = StagingAuthVerifyErrors[keyof StagingAuthVe
 
 export type StagingAuthVerifyResponses = {
     /**
-     * No Content
+     * OK
      */
-    204: void;
+    200: string;
 };
 
 export type StagingAuthVerifyResponse = StagingAuthVerifyResponses[keyof StagingAuthVerifyResponses];
